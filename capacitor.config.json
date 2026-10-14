@@ -1,0 +1,11 @@
+{
+  "appId": "com.cagdas.forgemaster",
+  "appName": "Forge Master",
+  "webDir": "dist",
+  "backgroundColor": "#2b1d14",
+  "ios": {
+    "contentInset": "never",
+    "scrollEnabled": false,
+    "backgroundColor": "#2b1d14"
+  }
+}
