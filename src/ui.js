@@ -6,6 +6,10 @@ import { REGIONS, CAPITAL, regionIndex } from './regions/index.js';
 import { BOSSES } from './bosses.js';
 import { iconImg } from './icons.js';
 import { sfx } from './audio.js';
+import {
+  GEM_PACKS, SHOP_ITEMS, packTotal, AD_DAILY_LIMIT, AD_BOOST_MIN, AD_GOLD_FACTOR, TEST_MODE,
+  adsLeft, showRewarded, buyPack, startBanner,
+} from './monetization.js';
 
 const tmp = new THREE.Vector3();
 
@@ -31,9 +35,15 @@ export class UI {
             <button id="sefer" aria-label="Haftanın seferi"></button>
           </div>
           <div class="top-right">
+            <button id="gems" aria-label="Mağaza">${iconImg('gem')}<span class="gem-val">0</span><i>+</i></button>
             <button id="btn-map" class="round-btn map-btn" aria-label="Harita">${iconImg('map')}</button>
-            <button id="btn-sound" class="round-btn" aria-label="Ses">🔊</button>
+            <button id="btn-menu" class="round-btn map-btn" aria-label="Ana menü">${iconImg('home')}</button>
           </div>
+        </div>
+        <div id="boost" hidden>${iconImg('bolt')}<span>x2 BEREKET</span><b></b></div>
+        <div id="ad-btns">
+          <button id="ad-boost" class="ad-btn">${iconImg('tv', 'ico tv')}${iconImg('bolt')}<small>x2 · ${AD_BOOST_MIN} dk</small></button>
+          <button id="ad-gold" class="ad-btn">${iconImg('tv', 'ico tv')}${iconImg('coin')}<small class="ad-gold-val">+0</small></button>
         </div>
         <div id="objective" hidden><span class="obj-step"></span><span class="obj-text"></span></div>
         <div id="toasts"></div>
@@ -69,8 +79,44 @@ export class UI {
         </div>
         <div class="map-card"></div>
       </div>
+      <div id="menu">
+        <div class="menu-art">
+          <div class="menu-sparks"></div>
+          ${iconImg('hammer', 'ico menu-logo')}
+          <h1>FORGE<b>MASTER</b></h1>
+          <p class="menu-sub">Krallığın demircisi</p>
+        </div>
+        <div class="menu-info"></div>
+        <div class="menu-buttons">
+          <button class="go-btn menu-play" data-menu="play">OYNA</button>
+          <div class="card-row">
+            <button class="go-btn alt" data-menu="map">${iconImg('map')} Harita</button>
+            <button class="go-btn alt" data-menu="store">${iconImg('store')} Mağaza</button>
+          </div>
+          <div class="card-row">
+            <button class="go-btn alt" data-menu="free">${iconImg('tv')} Ücretsiz ödül</button>
+            <button class="go-btn alt" id="btn-sound" data-menu="sound">🔊 Ses</button>
+          </div>
+        </div>
+      </div>
+      <div id="store" hidden>
+        <div class="panel-card">
+          <div class="panel-head">
+            <div class="panel-title">MAĞAZA</div>
+            <div class="panel-gold">${iconImg('gem')}<span class="st-gems">0</span></div>
+            <button class="panel-close st-close" aria-label="Kapat">✕</button>
+          </div>
+          <div class="panel-tabs st-tabs">
+            <button data-st="gems" class="on">Elmas</button>
+            <button data-st="shop">Dükkan</button>
+            <button data-st="free">Ücretsiz</button>
+          </div>
+          <div class="panel-list st-list"></div>
+        </div>
+      </div>
       <div id="modal" hidden><div class="modal-card"></div></div>
       <div id="fade" hidden></div>
+      <button id="banner" aria-label="Reklam"><span class="ad-label">REKLAM</span><span class="banner-text"></span></button>
     `);
     const q = (s) => root.querySelector(s);
     this.el = {
@@ -83,7 +129,11 @@ export class UI {
       map: q('#map'), mapPaths: q('.map-paths'), mapNodes: q('.map-nodes'), mapDeco: q('.map-deco'), mapCard: q('.map-card'),
       sealVal: q('.seal-val'), mapClose: q('.map-close'),
       modal: q('#modal'), modalCard: q('.modal-card'), fade: q('#fade'),
+      gems: q('.gem-val'), boost: q('#boost'), boostT: q('#boost b'), adGoldVal: q('.ad-gold-val'),
+      menu: q('#menu'), menuInfo: q('.menu-info'), store: q('#store'), stList: q('.st-list'), stGems: q('.st-gems'),
     };
+    this.storeTab = 'gems';
+    this.setupMonetization(q);
     this.tab = 'smith';
     this.el.upBtn.addEventListener('click', () => this.openPanel());
     this.el.panel.querySelector('.panel-close').addEventListener('click', () => this.closePanel());
@@ -109,11 +159,11 @@ export class UI {
     });
     this.el.sound.addEventListener('click', () => {
       sfx.setOn(!sfx.on);
-      this.el.sound.textContent = sfx.on ? '🔊' : '🔇';
+      this.el.sound.textContent = sfx.on ? '🔊 Ses' : '🔇 Ses';
       try { localStorage.setItem('forgemaster.sound', sfx.on ? '1' : '0'); } catch { /* yok say */ }
     });
     try {
-      if (localStorage.getItem('forgemaster.sound') === '0') { sfx.setOn(false); this.el.sound.textContent = '🔇'; }
+      if (localStorage.getItem('forgemaster.sound') === '0') { sfx.setOn(false); this.el.sound.textContent = '🔇 Ses'; }
     } catch { /* yok say */ }
 
     // harita
@@ -163,7 +213,156 @@ export class UI {
 
   icon(name) { return iconImg(name); }
 
-  get panelOpen() { return !this.el.panel.hidden || !this.el.map.hidden || !this.el.modal.hidden; }
+  get panelOpen() {
+    return !this.el.panel.hidden || !this.el.map.hidden || !this.el.modal.hidden || !this.el.menu.hidden || !this.el.store.hidden
+      || !!this.root.querySelector('#ad-overlay, #buy-confirm');
+  }
+
+  // ---------- ana menü, mağaza, reklamlar ----------
+  setupMonetization(q) {
+    q('#btn-menu').addEventListener('click', () => this.openMenu());
+    q('#gems').addEventListener('click', () => this.openStore('gems'));
+    q('#ad-boost').addEventListener('click', () => this.watchAd('boost'));
+    q('#ad-gold').addEventListener('click', () => this.watchAd('gold'));
+    this.el.menu.addEventListener('click', (e) => {
+      const b = e.target.closest('[data-menu]');
+      if (!b) return;
+      sfx.unlock();
+      const a = b.dataset.menu;
+      if (a === 'play') this.closeMenu();
+      if (a === 'map') { this.closeMenu(); this.openMap(); }
+      if (a === 'store') this.openStore('gems');
+      if (a === 'free') this.openStore('free');
+    });
+    this.el.store.querySelector('.st-close').addEventListener('click', () => this.closeStore());
+    this.el.store.addEventListener('pointerdown', (e) => { if (e.target === this.el.store) this.closeStore(); });
+    for (const b of this.el.store.querySelectorAll('[data-st]')) {
+      b.addEventListener('click', () => this.renderStore(b.dataset.st));
+    }
+    this.el.stList.addEventListener('click', async (e) => {
+      const pack = e.target.closest('[data-pack]');
+      if (pack) {
+        const p = GEM_PACKS.find((x) => x.id === pack.dataset.pack);
+        if (await buyPack(p)) {
+          this.profile.addGems(packTotal(p));
+          sfx.unlock2();
+          this.toast(`+${packTotal(p)} elmas`);
+        }
+        this.renderStore();
+      }
+      const item = e.target.closest('[data-item]');
+      if (item) this.buyItem(item.dataset.item);
+      const ad = e.target.closest('[data-ad]');
+      if (ad) this.watchAd(ad.dataset.ad);
+    });
+    startBanner(q('#banner'), (go) => this.openStore(go));
+  }
+
+  openMenu() {
+    sfx.unlock();
+    this.closePanel();
+    this.closeMap();
+    const g = this.game, P = this.profile;
+    if (g) {
+      const b = P.boss();
+      this.el.menuInfo.innerHTML = `
+        <span>${iconImg(g.region.icon)}<b>${g.region.name}</b> · Sipariş ${g.rs.level + 1}</span>
+        <span>${iconImg(b.icon)}${b.week + 1}. hafta: ${b.name} · ${P.campaign.won ? 'yenildi' : `%${Math.round(P.weaponProgress() * 100)}`}</span>`;
+    }
+    this.el.menu.hidden = false;
+  }
+
+  closeMenu() { this.el.menu.hidden = true; }
+
+  openStore(tab) {
+    sfx.unlock();
+    this.el.store.hidden = false;
+    this.renderStore(tab || this.storeTab);
+  }
+
+  closeStore() { this.el.store.hidden = true; }
+
+  adGold() { return Math.max(60, Math.round((this.game?.orderValue() || 200) * AD_GOLD_FACTOR)); }
+
+  renderStore(tab = this.storeTab) {
+    this.storeTab = tab;
+    for (const b of this.el.store.querySelectorAll('[data-st]')) b.classList.toggle('on', b.dataset.st === tab);
+    const P = this.profile;
+    this.el.stGems.textContent = fmt(P.gems);
+    const test = TEST_MODE ? '<p class="card-note">Test modu: satın almalar ve reklamlar simüle edilir, gerçek ödeme alınmaz.</p>' : '';
+    if (tab === 'gems') {
+      this.el.stList.innerHTML = `<div class="packs">${GEM_PACKS.map((p) => `
+        <button class="pack ${p.tag ? 'featured' : ''}" data-pack="${p.id}">
+          ${p.tag ? `<span class="pack-tag">${p.tag}</span>` : ''}
+          ${iconImg('gem', 'ico pack-ico')}
+          <b>${packTotal(p).toLocaleString('tr-TR')}</b>
+          <small>${p.bonus ? `+%${p.bonus} bonus` : '&nbsp;'}</small>
+          <span class="pack-price">${p.price}</span>
+        </button>`).join('')}</div>${test}`;
+    } else if (tab === 'shop') {
+      const ov = this.game?.orderValue() || 200;
+      this.el.stList.innerHTML = SHOP_ITEMS.map((it) => {
+        const what = it.gold ? `${fmt(Math.round(ov * it.gold))} altın (${this.game?.region.name || 'bölge'})`
+          : it.boost ? `${it.boost} dk: kaynaklar ve atölyeler 2 kat`
+            : `${it.seals} Krallık Mührü`;
+        return `<div class="up-row">
+          <div class="up-ico">${iconImg(it.icon)}</div>
+          <div class="up-mid"><b>${it.name}</b><small>${what}</small></div>
+          <button class="buy ${P.gems < it.gems ? 'cant' : ''}" data-item="${it.id}">${iconImg('gem')}${it.gems}</button>
+        </div>`;
+      }).join('');
+    } else {
+      const left = adsLeft(P);
+      const dis = left <= 0 ? 'disabled' : '';
+      this.el.stList.innerHTML = `
+        <div class="up-row">
+          <div class="up-ico">${iconImg('bolt')}</div>
+          <div class="up-mid"><b>${AD_BOOST_MIN} dakika 2 kat bereket</b><small>Toplanan her kaynak iki tane gelir, atölyeler iki kat hızlı</small></div>
+          <button class="buy" data-ad="boost" ${dis}>${iconImg('tv')}İzle</button>
+        </div>
+        <div class="up-row">
+          <div class="up-ico">${iconImg('coin')}</div>
+          <div class="up-mid"><b>${fmt(this.adGold())} altın</b><small>${this.game?.region.name || ''} bölgesine</small></div>
+          <button class="buy" data-ad="gold" ${dis}>${iconImg('tv')}İzle</button>
+        </div>
+        <p class="card-note">${left > 0 ? `Bugün ${left}/${AD_DAILY_LIMIT} reklam hakkın var.` : 'Bugünkü reklam hakların bitti, yarın yenilenir.'}</p>${test}`;
+    }
+  }
+
+  buyItem(id) {
+    const it = SHOP_ITEMS.find((x) => x.id === id);
+    const P = this.profile, g = this.game;
+    if (!P.spendGems(it.gems)) { sfx.deny(); this.renderStore('gems'); this.toast('Yeterli elmas yok'); return; }
+    if (it.gold && g) { const n = Math.round(g.orderValue() * it.gold); g.gold += n; this.setGold(g.gold); this.toast(`+${fmt(n)} altın`); }
+    if (it.boost) { P.addBoost(it.boost); this.toast(`Bereket: +${it.boost} dk`); }
+    if (it.seals) { P.data.seals += it.seals; P.save(); this.toast(`+${it.seals} mühür`); }
+    sfx.buy();
+    g?.save();
+    this.renderStore();
+  }
+
+  async watchAd(kind) {
+    const P = this.profile, g = this.game;
+    if (adsLeft(P) <= 0) { sfx.deny(); this.toast('Bugünkü reklam hakların bitti'); return; }
+    const gold = this.adGold();
+    const ok = await showRewarded(P, kind === 'boost' ? `${AD_BOOST_MIN} dk 2 kat bereket` : `${fmt(gold)} altın`);
+    if (!ok) return;
+    if (kind === 'boost') { P.addBoost(AD_BOOST_MIN); this.toast(`Bereket başladı: ${AD_BOOST_MIN} dk x2`); }
+    else if (g) { g.gold += gold; this.setGold(g.gold); g.save(); this.toast(`+${fmt(gold)} altın`); }
+    sfx.unlock2();
+    if (!this.el.store.hidden) this.renderStore();
+  }
+
+  // Elmas, bereket sayacı ve reklam düğmeleri (saniyede bir)
+  updateMonetization() {
+    const P = this.profile;
+    if (!P) return;
+    this.el.gems.textContent = fmt(P.gems);
+    const left = P.boostLeft();
+    this.el.boost.hidden = left <= 0;
+    if (left > 0) { const s = Math.ceil(left / 1000); this.el.boostT.textContent = `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; }
+    this.el.adGoldVal.textContent = `+${fmt(this.adGold())}`;
+  }
 
   // ---------- altın ----------
   setGold(v) {
@@ -262,6 +461,8 @@ export class UI {
   }
 
   update(dt) {
+    this.monT = (this.monT || 0) - dt;
+    if (this.monT <= 0) { this.monT = 0.5; this.updateMonetization(); }
     // altın sayacı yumuşak sayar
     if (this.shownGold !== this.gold) {
       const d = this.gold - this.shownGold;

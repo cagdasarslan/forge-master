@@ -30,6 +30,18 @@ Telefonla aynı Wi-Fi'deysen terminalde görünen `Network:` adresini telefonda 
 - **Haftalık sefer** (başkent): her 7 günde yeni düşman: Kızıl Ejderha, Buz Devi, Krakeni, Kara Lich, Taş Golem, Ork Savaş Lordu, Gölge Kraliçe, Kurt Kral, sonra baştan ve daha güçlü. Silahın parçalarını Ambar'dan gönderirsin. Yenilen her düşman ganimet salonuna girer (satışlar kalıcı +%3), haftanın kalanında **Kraliyet Görevleri** mühür verir. Yenilemeyen düşman kaçar, ilerlemeye göre teselli mührü verilir.
 - **Mühürler**: kalıcı bonuslar (başlangıç altını, bedava ilk işçi, hız, satış, atölye hızı, kervan akışı).
 
+## Ana menü, mağaza ve reklamlar
+
+- **Ana menü** açılışta görünür; oyundaki ev düğmesiyle dönülür. Bölge ve haftanın seferi özeti, Harita, Mağaza, Ücretsiz ödül ve Ses düğmeleri var.
+- **Mağaza:**
+  - Elmas: gerçek parayla alınan paketler.
+  - Dükkan: elmasla bölgeye altın (siparişin değerine göre), 30 dk / 2 saat bereket, mühür.
+  - Ücretsiz: reklam izle.
+- **Ödüllü reklam** (günde 12): 5 dakika 2× bereket ya da bölgeye altın. Bereketteyken toplanan her kaynak iki tane gelir ve atölyeler iki kat hızlı çalışır. Süreler üst üste eklenir. Sol alttaki düğmelerden de izlenir.
+- **Reklam bandı** her ekranın altında sabit durur (50 px, AdMob banner boyutu).
+
+[src/monetization.js](src/monetization.js) şu an **test modunda**: satın almalar ve reklamlar simüle edilir. Gerçek ödeme için App Store Connect'te ürünler tanımlanıp StoreKit eklentisi (RevenueCat ya da cordova-plugin-purchase), gerçek reklam için AdMob ve `@capacitor-community/admob` bağlanmalı. İkisi de ücretli Apple Developer Program üyeliği ve App Store / TestFlight dağıtımı ister; ücretsiz Apple ID ile sideload edilen IPA'da gerçek satın alma çalışmaz.
+
 ## Süre (bot simülasyonuyla ölçüldü)
 
 Oyunu kendi kendine oynayan bot (`src/sim.js`) ile ölçülen oyun süreleri. Bot hiç boş durmaz ve hep doğru şeyi seçer; gerçek oyuncu daha uzun sürer.

@@ -108,6 +108,8 @@ class GatherNode {
       if (best) best.userData.shake = 1;
       tmp.copy(from).setY(1.1);
       agent.stack.spawn(this.type, tmp);
+      // bereket: her toplama iki kaynak verir
+      if (this.game.profile.boostActive() && !agent.stack.full) agent.stack.spawn(this.type, tmp);
       const fx = this.game.fx;
       if (this.def.visual === 'trees') fx.leaves(tmp.clone().setY(2.2));
       else fx.chips(tmp, this.def.speck ?? C.ore);
@@ -208,7 +210,7 @@ class Station {
   update(dt) {
     if (!this.unlocked) return;
     const ud = this.model.userData;
-    const mult = stats.craft(this.game.levels.craft) * this.game.profile.craftBonus();
+    const mult = stats.craft(this.game.levels.craft) * this.game.profile.craftBonus() * (this.game.profile.boostActive() ? 0.5 : 1);
     const hot = !this.fuel || this.heat > 0 || this.inputs[this.fuel.type].total > 0;
     if (!this.busy) {
       const ok = hot && Object.entries(this.recipe.in).every(([t, n]) => this.inputs[t].total >= n) && this.output.total < STATION_OUTPUT_CAP;
@@ -960,6 +962,11 @@ export class Game {
     this.fx.confetti(this.chest.pos.clone().setY(1));
     sfx.unlock2();
     this.ui.orderPopup(this.region, this.rs.level, seals, gold);
+  }
+
+  // Şu anki siparişin altın değeri: reklam ve mağaza altını buna göre ölçeklenir
+  orderValue() {
+    return Object.entries(this.order()).reduce((s, [t, n]) => s + ITEMS[t].price * n, 0);
   }
 
   orderView() {

@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import './style.css';
 import './map.css';
+import './monetization.css';
 import { Game } from './game.js';
 import { UI } from './ui.js';
 import { Input } from './input.js';
@@ -70,6 +71,7 @@ ui.onTravel = (id) => {
   profile.save();
   location.reload();
 };
+ui.openMenu(); // açılışta ana menü
 if (offline && Object.keys(offline.gained).length) ui.offlinePopup(offline);
 // haftalık sefer: süre dolduysa yeni düşman
 const rolled = profile.ensureCampaign();

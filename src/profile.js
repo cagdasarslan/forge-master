@@ -110,6 +110,23 @@ export class Profile {
     return true;
   }
 
+  // ---------- elmas ve bereket (mağaza / reklam) ----------
+  get gems() { return this.data.gems || 0; }
+  addGems(n) { this.data.gems = this.gems + n; this.save(); }
+  spendGems(n) {
+    if (this.gems < n) return false;
+    this.data.gems -= n;
+    this.save();
+    return true;
+  }
+  boostLeft() { return Math.max(0, (this.data.boostUntil || 0) - Date.now()); }
+  boostActive() { return this.boostLeft() > 0; }
+  // süre üst üste eklenir
+  addBoost(minutes) {
+    this.data.boostUntil = Math.max(Date.now(), this.data.boostUntil || 0) + minutes * 60000;
+    this.save();
+  }
+
   priceBonus() { return (1 + TROPHY_BONUS * this.trophies().length) * (1 + 0.05 * this.meta('merchant')); }
   craftBonus() { return 1 / (1 + 0.05 * this.meta('craftsman')); }
 

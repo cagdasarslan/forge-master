@@ -215,6 +215,30 @@ const DRAW = {
     g.beginPath(); g.moveTo(12, 70); g.quadraticCurveTo(30, 40, 48, 48); g.lineTo(60, 22); g.lineTo(66, 40); g.lineTo(84, 34); g.lineTo(74, 52); g.quadraticCurveTo(66, 74, 40, 76); g.closePath(); outline(g, '#2f7a5a');
     g.fillStyle = '#ffd84a'; g.beginPath(); g.arc(70, 44, 3, 0, 7); g.fill();
   },
+  gem(g) {
+    g.beginPath(); g.moveTo(28, 22); g.lineTo(68, 22); g.lineTo(84, 40); g.lineTo(48, 82); g.lineTo(12, 40); g.closePath(); outline(g, '#3fc8e8');
+    g.fillStyle = '#b8f0ff'; g.beginPath(); g.moveTo(28, 22); g.lineTo(40, 40); g.lineTo(12, 40); g.closePath(); g.fill();
+    g.fillStyle = '#1f8fb8'; g.beginPath(); g.moveTo(56, 40); g.lineTo(84, 40); g.lineTo(48, 82); g.closePath(); g.fill();
+    g.strokeStyle = '#2a1a10'; g.lineWidth = 3; g.beginPath(); g.moveTo(12, 40); g.lineTo(84, 40); g.moveTo(40, 40); g.lineTo(48, 82); g.lineTo(56, 40); g.stroke();
+  },
+  bolt(g) {
+    g.beginPath(); g.moveTo(56, 8); g.lineTo(22, 54); g.lineTo(44, 54); g.lineTo(36, 88); g.lineTo(76, 38); g.lineTo(52, 38); g.closePath(); outline(g, '#ffd84a');
+  },
+  tv(g) {
+    rr(g, 10, 24, 76, 54, 8); outline(g, '#4a2e1c');
+    rr(g, 18, 32, 60, 38, 4); outline(g, '#5ab4e0', 3);
+    g.fillStyle = '#fff'; g.beginPath(); g.moveTo(42, 40); g.lineTo(58, 51); g.lineTo(42, 62); g.closePath(); g.fill();
+    g.strokeStyle = '#2a1a10'; g.lineWidth = 5; g.beginPath(); g.moveTo(36, 10); g.lineTo(48, 24); g.lineTo(60, 10); g.stroke();
+  },
+  home(g) {
+    g.beginPath(); g.moveTo(48, 12); g.lineTo(86, 46); g.lineTo(74, 46); g.lineTo(74, 84); g.lineTo(22, 84); g.lineTo(22, 46); g.lineTo(10, 46); g.closePath(); outline(g, '#f6e7c4');
+    rr(g, 40, 58, 16, 26, 3); outline(g, '#8a5530', 4);
+  },
+  store(g) {
+    rr(g, 14, 40, 68, 42, 6); outline(g, '#f6e7c4');
+    for (let i = 0; i < 4; i++) { g.beginPath(); g.moveTo(10 + i * 19, 40); g.lineTo(14 + i * 19, 18); g.lineTo(33 + i * 19, 18); g.lineTo(29 + i * 19, 40); g.closePath(); outline(g, i % 2 ? '#f6e7c4' : '#c23b30', 4); }
+    rr(g, 38, 56, 20, 26, 3); outline(g, '#8a5530', 4);
+  },
   hammer(g) {
     g.save(); g.translate(48, 48); g.rotate(-0.6);
     rr(g, -4, -10, 8, 50, 3); outline(g, '#8a5530', 4);
