@@ -27,6 +27,19 @@ export class Bot {
   // Satın alma: inşa alanı yakınsa ona para biriktir, değilse en ucuz faydalı geliştirmeyi al
   shop() {
     const g = this.g;
+    // 3. sipariş bitti: bütün altını orduya ver, yeterince güçlenince bekçiye saldır
+    if (g.guardianReady()) {
+      for (let guard = 0; guard < 40; guard++) {
+        const opts = g.region.army.filter((u) => g.canRecruit(u)).map((u) => ({ u, cost: g.armyCost(u) }));
+        if (!opts.length) break;
+        opts.sort((a, b) => a.cost / a.u.power - b.cost / b.u.power);
+        const best = opts.find((o) => o.cost <= g.gold);
+        if (!best || g.armyPower() >= g.region.guardian.power) break;
+        g.recruit(best.u.id);
+      }
+      if (g.armyPower() >= g.region.guardian.power) g.attackGuardian();
+      return;
+    }
     const pad = g.pads.find((p) => p.visible);
     for (let guard = 0; guard < 20; guard++) {
       const opts = g.upgrades.filter((u) => g.canUpgrade(u)).map((u) => ({ u, cost: g.costOf(u), rank: PRIORITY.indexOf(u.worker ? 'worker' : u.id) }));

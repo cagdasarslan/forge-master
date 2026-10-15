@@ -33,6 +33,11 @@ export class Profile {
     d.seals ||= 0;
     d.lastSeen ||= Date.now();
     if (!REGIONS.some((r) => r.id === d.current)) d.current = 'village';
+    // bekçi sistemi eklenmeden önce sonraki bölgeye geçmiş oyuncular o bekçiyi yenmiş sayılır
+    REGIONS.forEach((r, i) => {
+      const next = REGIONS[i + 1];
+      if (next && d.regions[next.id]?.visited && d.regions[r.id]) d.regions[r.id].guardianDefeated = true;
+    });
     this.ensureCampaign();
   }
 
@@ -79,12 +84,15 @@ export class Profile {
   level(id) { return this.data.regions[id]?.level || 0; }
   totalLevels() { return REGIONS.reduce((s, r) => s + this.level(r.id), 0); }
 
-  // İlk bölge hep açık; diğerleri bir öncekinde 3 sipariş bitince açılır
+  // İlk bölge hep açık; diğerleri bir öncekinde 3 sipariş bitip bölge bekçisi yenilince açılır
   isOpen(id) {
     const i = regionIndex(id);
     if (i <= 0) return true;
-    return this.level(REGIONS[i - 1].id) >= REGION_UNLOCK_LEVEL;
+    const prev = REGIONS[i - 1].id;
+    return this.level(prev) >= REGION_UNLOCK_LEVEL && this.guardianDown(prev);
   }
+
+  guardianDown(id) { return !!this.data.regions[id]?.guardianDefeated; }
 
   // ---------- sonsuz siparişler ----------
   // İlk siparişler bölge verisinde; sonrakiler sonuncunun büyütülmüş hali

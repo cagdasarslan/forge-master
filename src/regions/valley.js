@@ -59,6 +59,15 @@ export default {
     { id: 'hauler', name: 'Çırak', icon: 'bronze', look: 'apprentice', hauler: true, base: 900, requires: 'spear' },
   ],
 
+  guardian: {
+    name: 'Bakır Basilisk', icon: 'serpent', power: 600,
+    story: 'Bakır kayalıklarda yuvalanan Basilisk, kaleye giden geçidi tutuyor. Bakışı askerleri taşa çevirir.',
+  },
+  army: [
+    { id: 'slinger', name: 'Çoban Sapancı', icon: 'copper', base: 400, power: 10 },
+    { id: 'spearman', name: 'Mızrakçı', icon: 'spear', base: 1600, power: 45, requires: 'spear' },
+    { id: 'legionary', name: 'Lejyoner', icon: 'helmet', base: 4500, power: 120, requires: 'helmet' },
+  ],
   colliders: [
     { box: [-4.8, -1.2, -6.6, -4.5] },
     { box: [-11.5, -8.5, -0.2, 1.7], requires: 'spear' },

@@ -24,7 +24,8 @@ Telefonla aynı Wi-Fi'deysen terminalde görünen `Network:` adresini telefonda 
 | 5 | Kristal Mağaraları | Karanlık taş, mantarlar, kristaller | Damar + mana → kristal (öğütücü) → asa (büyü sunağı) | Karanlık, oyuncunun elinde fener; derin damar meşaleyle açılır | Ruh Kristali | Altın varak |
 | 6 | Ejderha Dağı | Kül ve lav çatlakları, volkanlar | Lav + pul → ejderha ateşi (obsidyen ocak), pul kalkan (pres) | Ejderha uyurken pul toplanır; uyanınca indeki yük yanar | Ejderha Ateşi | Çelik |
 
-- **Kraliyet Siparişi** (sandık): sonsuz seviyeli. Her sipariş mühür ve altın verir. Bir bölgede 3. sipariş bitince sıradaki bölge açılır.
+- **Kraliyet Siparişi** (sandık): sonsuz seviyeli. Her sipariş mühür ve altın verir.
+- **Bölge bekçisi:** 3. sipariş bitince sıradaki bölgeye giden yolu bölgenin madenine göre bir bekçi tutar: Demir Golem (Köy), Bakır Basilisk (Vadi), Kömür Devi (Kale), Altın Timsah (Nehir), Kristal Örümcek Kraliçesi (Mağara), Magma Titanı (Ejderha Dağı). Lonca → **Ordu** sekmesinden altınla asker alınır; her bölgenin 3 asker türü vardır (her alımda fiyat %12 artar). Ordunun toplam gücü bekçininkine yetiyorsa bekçi ölür, mühür ve altın verir, sıradaki bölge açılır. Günde en fazla 3 saldırı.
 - **KERVAN** alanı (sandığın önü): oraya bırakılan bölge malı doğrudan **Krallık Ambarı**'na gider. Siparişi bitmiş bölgeler ayrıca kendi kendine yavaş bir kervan akışı yollar.
 - **Kervan durağı (GELEN)**: bazı tarifler başka bölgenin malına ihtiyaç duyar; mal Ambar'dan gelir. Ambar boşsa durak, hangi bölgeye dönmen gerektiğini söyler.
 - **Haftalık sefer** (başkent): her 7 günde yeni düşman: Kızıl Ejderha, Buz Devi, Krakeni, Kara Lich, Taş Golem, Ork Savaş Lordu, Gölge Kraliçe, Kurt Kral, sonra baştan ve daha güçlü. Silahın parçalarını Ambar'dan gönderirsin. Yenilen her düşman ganimet salonuna girer (satışlar kalıcı +%3), haftanın kalanında **Kraliyet Görevleri** mühür verir. Yenilemeyen düşman kaçar, ilerlemeye göre teselli mührü verilir.
@@ -48,9 +49,10 @@ Oyunu kendi kendine oynayan bot (`src/sim.js`) ile ölçülen oyun süreleri. Bo
 
 | | Süre |
 |---|---|
-| 1. hafta: 6 bölgenin açılması | 10,2 saat (Köy 72, Vadi 81, Kale 93, Nehir 66, Mağara 210 dk) |
-| 1. hafta: Ejderha Kıran Kılıcı'nın kalanı | 3,4 saat |
-| **1. hafta toplam** | **13,6 saat** |
+| 1. hafta: 6 bölgenin siparişleri | 9,2 saat (Köy 72, Vadi 72, Kale 84, Nehir 69, Mağara 201, Ejderha 54 dk) |
+| 1. hafta: 6 bölge bekçisi | 4,8 saat (Köy 33, Vadi 51, Kale 48, Nehir 45, Mağara 72, Ejderha 39 dk) |
+| 1. hafta: Ejderha Kıran Kılıcı'nın kalanı | ~3,4 saat (bekçilerden önceki ölçüm) |
+| **1. hafta toplam** | **~17 saat** |
 | 2. hafta (Buz Devi), olgun krallıkla | 6,6 saat ölçüldü; ardından ihtiyaçlar ×1,7 yapıldı → ~11-12 saat bekleniyor |
 
 Sonraki her hafta düşman %10 güçlenir.

@@ -244,3 +244,32 @@
 .trophies small { display: block; font-family: system-ui, sans-serif; font-size: 12px; font-weight: 700; color: #7a5a3a; }
 .trophies div { display: flex; gap: 6px; flex-wrap: wrap; }
 .trophies .ico { width: 30px; height: 30px; }
+
+/* ---------- ordu ve bölge bekçisi ---------- */
+.guardian {
+  display: flex; flex-direction: column; gap: 8px;
+  padding: 12px;
+  border-radius: 16px;
+  background: linear-gradient(#4a2e1c, #2b1d14);
+  color: var(--parch);
+  border: 3px solid var(--red);
+}
+.gd-head { display: flex; align-items: center; gap: 10px; }
+.gd-head b { display: block; font-weight: normal; font-size: 20px; color: var(--gold); }
+.gd-head small { font-family: system-ui, sans-serif; font-weight: 700; font-size: 12px; color: #e9d7b0; }
+.gd-ico { width: 54px !important; height: 54px !important; flex: none; filter: drop-shadow(0 0 8px rgba(255, 90, 40, .6)); }
+.gd-story { font-family: system-ui, sans-serif; font-weight: 600; font-size: 12px; line-height: 1.4; color: #d9c6a5; }
+.gd-bar { position: relative; height: 24px; border-radius: 12px; background: rgba(0, 0, 0, .4); overflow: hidden; }
+.gd-bar i { position: absolute; inset: 0 auto 0 0; background: linear-gradient(90deg, #c23b30, #f2a92a); border-radius: 12px; }
+.gd-bar span { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; gap: 4px; font-size: 13px; font-variant-numeric: tabular-nums; text-shadow: 0 1px 0 #000; }
+.gd-bar .ico { width: 18px; height: 18px; }
+.gd-bar.big { width: 100%; height: 30px; }
+.gd-bar i.grow { width: var(--to); animation: grow 2.2s ease-out; }
+@keyframes grow { from { width: 0; } }
+.gd-status { font-family: system-ui, sans-serif; font-weight: 700; font-size: 13px; text-align: center; }
+.gd-status b { color: var(--gold); }
+.gd-done { color: #7fd04f; }
+.guardian .go-btn.ready { animation: pulse 1s ease-in-out infinite; }
+.up-mid b .cnt { font-style: normal; font-size: 14px; color: #7a5a3a; margin-left: 4px; }
+.clash { display: flex; align-items: center; gap: 14px; font-size: 40px; }
+.clash .fin-ico { width: 90px !important; height: 90px !important; }

@@ -52,6 +52,16 @@ export default {
     { id: 'hauler', name: 'Çırak', icon: 'ingot', look: 'apprentice', hauler: true, base: 900, requires: 'anvil' },
   ],
 
+  // Bölge bekçisi: 3. siparişten sonra bu yenilmeden sıradaki bölge açılmaz
+  guardian: {
+    name: 'Demir Golem', icon: 'golem', power: 420,
+    story: 'Madenin derinliklerinden çıkan Demir Golem, vadiye giden yolu kesti. Ancak bir ordu onu durdurabilir.',
+  },
+  army: [
+    { id: 'militia', name: 'Köylü Milis', icon: 'axe', base: 150, power: 4 },
+    { id: 'swordsman', name: 'Kılıççı', icon: 'sword', base: 600, power: 18, requires: 'anvil' },
+    { id: 'shieldman', name: 'Kalkan Muhafızı', icon: 'shield', base: 1500, power: 45, requires: 'bench' },
+  ],
   colliders: [
     { box: [-1.8, 1.8, -7.6, -5.5] },
     { box: [5.5, 8.5, -1.2, 0.7], requires: 'anvil' },

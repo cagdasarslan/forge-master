@@ -55,6 +55,15 @@ export default {
     { id: 'hauler', name: 'Çırak', icon: 'steel', look: 'apprentice', hauler: true, base: 1000, requires: 'armory' },
   ],
 
+  guardian: {
+    name: 'Kömür Devi', icon: 'giant', power: 1300,
+    story: 'Kömür ocaklarının külünden doğan dev, nehir yolunu ateşle kapattı.',
+  },
+  army: [
+    { id: 'pikeman', name: 'Kömürcü Milis', icon: 'coal', base: 900, power: 22 },
+    { id: 'guardsman', name: 'Zırhlı Muhafız', icon: 'armor', base: 3500, power: 95, requires: 'armory' },
+    { id: 'knight', name: 'Çelik Şövalye', icon: 'steelsword', base: 9000, power: 240, requires: 'smithy' },
+  ],
   colliders: [
     { box: [-1.8, 1.8, -7.6, -5.5] },
     { box: [5.7, 9.3, -1.4, 1.1], requires: 'armory' },

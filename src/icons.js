@@ -239,6 +239,64 @@ const DRAW = {
     for (let i = 0; i < 4; i++) { g.beginPath(); g.moveTo(10 + i * 19, 40); g.lineTo(14 + i * 19, 18); g.lineTo(33 + i * 19, 18); g.lineTo(29 + i * 19, 40); g.closePath(); outline(g, i % 2 ? '#f6e7c4' : '#c23b30', 4); }
     rr(g, 38, 56, 20, 26, 3); outline(g, '#8a5530', 4);
   },
+  golem(g) {
+    rr(g, 26, 30, 44, 44, 6); outline(g, '#8a8f96');
+    rr(g, 34, 10, 28, 24, 5); outline(g, '#9aa4ae');
+    g.fillStyle = '#ff8a2a'; g.fillRect(39, 18, 6, 6); g.fillRect(51, 18, 6, 6);
+    rr(g, 10, 34, 16, 34, 5); outline(g, '#7d8893', 4); rr(g, 70, 34, 16, 34, 5); outline(g, '#7d8893', 4);
+    rr(g, 30, 74, 14, 16, 3); outline(g, '#6d7680', 4); rr(g, 52, 74, 14, 16, 3); outline(g, '#6d7680', 4);
+    g.fillStyle = '#d2753a'; g.beginPath(); g.arc(48, 52, 6, 0, 7); g.fill();
+  },
+  serpent(g) {
+    g.lineCap = 'round'; g.lineWidth = 18; g.strokeStyle = '#2a1a10';
+    g.beginPath(); g.moveTo(14, 80); g.quadraticCurveTo(40, 50, 26, 40); g.quadraticCurveTo(14, 26, 44, 22); g.stroke();
+    g.lineWidth = 11; g.strokeStyle = '#d9813a'; g.stroke();
+    g.beginPath(); g.ellipse(60, 24, 18, 12, 0.2, 0, 7); outline(g, '#c7843f');
+    g.fillStyle = '#4fae8a'; g.beginPath(); g.arc(64, 20, 4, 0, 7); g.fill();
+    g.strokeStyle = '#c23b30'; g.lineWidth = 3; g.beginPath(); g.moveTo(76, 28); g.lineTo(86, 32); g.lineTo(84, 26); g.stroke();
+  },
+  giant(g) {
+    g.beginPath(); g.moveTo(20, 86); g.lineTo(24, 40); g.quadraticCurveTo(48, 26, 72, 40); g.lineTo(76, 86); g.closePath(); outline(g, '#3c3a3a');
+    g.beginPath(); g.arc(48, 26, 16, 0, 7); outline(g, '#4a4646');
+    g.fillStyle = '#ff6a1a'; g.fillRect(40, 22, 5, 5); g.fillRect(52, 22, 5, 5);
+    g.strokeStyle = '#ff8a2a'; g.lineWidth = 3; g.beginPath(); g.moveTo(34, 50); g.lineTo(44, 62); g.lineTo(38, 74); g.moveTo(60, 48); g.lineTo(54, 62); g.stroke();
+  },
+  croc(g) {
+    g.beginPath(); g.moveTo(8, 56); g.quadraticCurveTo(30, 36, 60, 42); g.lineTo(88, 46); g.lineTo(88, 58); g.lineTo(60, 62); g.quadraticCurveTo(30, 72, 8, 56); outline(g, '#c9a030');
+    g.fillStyle = '#fff'; for (let x = 62; x < 86; x += 6) { g.beginPath(); g.moveTo(x, 52); g.lineTo(x + 3, 46); g.lineTo(x + 6, 52); g.fill(); }
+    g.fillStyle = '#2a1a10'; g.beginPath(); g.arc(56, 44, 3, 0, 7); g.fill();
+    g.fillStyle = '#f2c230'; for (let x = 20; x < 52; x += 10) { g.beginPath(); g.arc(x, 50, 3, 0, 7); g.fill(); }
+  },
+  spider(g) {
+    g.strokeStyle = '#2a1a10'; g.lineWidth = 5; g.lineCap = 'round';
+    for (const s of [-1, 1]) for (let i = 0; i < 4; i++) { g.beginPath(); g.moveTo(48, 52); g.lineTo(48 + s * 24, 34 + i * 12); g.lineTo(48 + s * 40, 44 + i * 14); g.stroke(); }
+    g.beginPath(); g.ellipse(48, 58, 16, 20, 0, 0, 7); outline(g, '#6a3ae0');
+    g.beginPath(); g.arc(48, 34, 11, 0, 7); outline(g, '#8a6ae8');
+    g.fillStyle = '#ff4a6a'; g.beginPath(); g.arc(44, 32, 3, 0, 7); g.arc(52, 32, 3, 0, 7); g.fill();
+    g.fillStyle = '#c9b8ff'; g.beginPath(); g.moveTo(48, 50); g.lineTo(54, 60); g.lineTo(48, 70); g.lineTo(42, 60); g.closePath(); g.fill();
+  },
+  magma(g) {
+    g.beginPath(); g.moveTo(16, 88); g.lineTo(22, 40); g.lineTo(34, 24); g.lineTo(62, 24); g.lineTo(74, 40); g.lineTo(80, 88); g.closePath(); outline(g, '#2a2220');
+    g.strokeStyle = '#ff6a1a'; g.lineWidth = 4; g.beginPath(); g.moveTo(30, 50); g.lineTo(42, 62); g.lineTo(36, 80); g.moveTo(64, 46); g.lineTo(54, 64); g.lineTo(62, 82); g.stroke();
+    g.fillStyle = '#ffd36a'; g.beginPath(); g.arc(40, 36, 5, 0, 7); g.arc(56, 36, 5, 0, 7); g.fill();
+    g.fillStyle = '#ff6a1a'; g.beginPath(); g.moveTo(34, 24); g.lineTo(40, 6); g.lineTo(48, 22); g.lineTo(56, 4); g.lineTo(62, 24); g.closePath(); g.fill();
+  },
+  bow(g) {
+    g.lineWidth = 7; g.strokeStyle = '#2a1a10'; g.beginPath(); g.arc(30, 48, 36, -1.1, 1.1); g.stroke();
+    g.lineWidth = 4; g.strokeStyle = '#8a5530'; g.stroke();
+    g.strokeStyle = '#e9e2d0'; g.lineWidth = 2; g.beginPath(); g.moveTo(46, 16); g.lineTo(46, 80); g.stroke();
+    g.strokeStyle = '#2a1a10'; g.lineWidth = 4; g.beginPath(); g.moveTo(40, 48); g.lineTo(86, 48); g.stroke();
+    g.fillStyle = '#9aa4ae'; g.beginPath(); g.moveTo(90, 48); g.lineTo(78, 41); g.lineTo(78, 55); g.closePath(); g.fill();
+  },
+  army(g) {
+    for (const s of [-1, 1]) {
+      g.save(); g.translate(48, 50); g.rotate(s * Math.PI / 4);
+      g.beginPath(); g.moveTo(-5, -10); g.lineTo(-5, -40); g.lineTo(0, -46); g.lineTo(5, -40); g.lineTo(5, -10); g.closePath(); outline(g, '#dfe6ee', 4);
+      rr(g, -15, -12, 30, 7, 3); outline(g, '#f2c230', 4);
+      rr(g, -3, -5, 6, 20, 2); outline(g, '#7a4a25', 4);
+      g.restore();
+    }
+  },
   hammer(g) {
     g.save(); g.translate(48, 48); g.rotate(-0.6);
     rr(g, -4, -10, 8, 50, 3); outline(g, '#8a5530', 4);

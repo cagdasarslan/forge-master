@@ -4,6 +4,7 @@ import * as THREE from 'three';
 import {
   ITEMS, STATION_INPUT_CAP, STATION_OUTPUT_CAP, SHELF_CAP, QUEUE_MAX,
   BASE_UPGRADES, upgradeCost, stats, WORKER_GROWTH, WORKER_MAX, orderSeals, DEPOT_INTERVAL, DEPOT_CAP,
+  ARMY_GROWTH, ARMY_MAX, GUARDIAN_TRIES, guardianSeals, REGION_UNLOCK_LEVEL,
 } from './config.js';
 import { MACHINES, animateMachine, makeDepot, makeWagon } from './machines.js';
 import { REGIONS } from './regions/index.js';
@@ -977,6 +978,58 @@ export class Game {
     };
   }
 
+  // ---------- ordu ve bölge bekçisi ----------
+  armyCount(id) { return this.rs.army?.[id] || 0; }
+  armyCost(u) { return Math.round(u.base * Math.pow(ARMY_GROWTH, this.armyCount(u.id))); }
+  armyPower() { return this.region.army.reduce((s, u) => s + this.armyCount(u.id) * u.power, 0); }
+  canRecruit(u) { return (!u.requires || this.unlocked.has(u.requires)) && this.armyCount(u.id) < ARMY_MAX; }
+
+  recruit(id) {
+    const u = this.region.army.find((x) => x.id === id);
+    if (!this.canRecruit(u)) return false;
+    const cost = this.armyCost(u);
+    if (this.gold < cost) { sfx.deny(); return false; }
+    this.gold -= cost;
+    this.rs.army ||= {};
+    this.rs.army[id] = this.armyCount(id) + 1;
+    this.ui.setGold(this.gold);
+    sfx.buy();
+    this.save();
+    return true;
+  }
+
+  // Bekçiye saldırı hakkı cihazın gününe göre her gün yenilenir
+  guardianTriesLeft() {
+    const day = new Date().toDateString();
+    const t = this.rs.bossTries;
+    return t?.day === day ? Math.max(0, GUARDIAN_TRIES - t.n) : GUARDIAN_TRIES;
+  }
+
+  guardianReady() { return this.rs.level >= REGION_UNLOCK_LEVEL && !this.rs.guardianDefeated; }
+
+  // Saldırı: ordunun gücü bekçinin gücüne yetiyorsa bekçi ölür. Sonucu döndürür.
+  attackGuardian() {
+    const gd = this.region.guardian;
+    if (!this.guardianReady() || this.guardianTriesLeft() <= 0) return null;
+    const day = new Date().toDateString();
+    const t = this.rs.bossTries?.day === day ? this.rs.bossTries : { day, n: 0 };
+    t.n++;
+    this.rs.bossTries = t;
+    const power = this.armyPower();
+    const won = power >= gd.power;
+    let seals = 0, gold = 0;
+    if (won) {
+      this.rs.guardianDefeated = true;
+      seals = guardianSeals(REGIONS.findIndex((r) => r.id === this.region.id));
+      gold = Math.round(this.orderValue() * 0.5);
+      this.profile.data.seals += seals;
+      this.gold += gold;
+      this.ui.setGold(this.gold);
+    }
+    this.save();
+    return { won, power, need: gd.power, seals, gold, triesLeft: this.guardianTriesLeft() };
+  }
+
   // ---------- açılımlar ve yükseltmeler ----------
   applyUnlockVisibility() {
     for (const s of this.stations) s.setVisible(s.unlocked);
@@ -1186,7 +1239,12 @@ export class Game {
       const carriesOrder = this.player.stack.items.some((it) => this.orderRemaining(it.type) > 0);
       at = pad ? pad.pos : carriesOrder ? this.chest.zone : null;
     }
-    this.ui.objective(step ? step.text : null, rs.tut, this.TUT.length);
+    if (step) this.ui.objective(step.text, rs.tut, this.TUT.length);
+    else if (this.guardianReady()) {
+      // 3. sipariş bitti: sıradaki bölgeye geçmek için bekçi yenilmeli
+      const gd = this.region.guardian;
+      this.ui.objective(this.armyPower() >= gd.power ? `Ordun hazır! Lonca → Ordu → ${gd.name}'e saldır` : `${gd.name}'i yenmek için Lonca → Ordu'dan asker topla`, 0, 0, '⚔');
+    } else this.ui.objective(null);
     const t = performance.now() * 0.004;
     this.arrow.visible = !!at;
     this.pointer.visible = false;
@@ -1287,7 +1345,8 @@ export class Game {
     this.fullT = Math.max(0, this.fullT - dt);
     this.saveT += dt;
     if (this.saveT > 4) { this.saveT = 0; this.save(); }
-    this.ui.setUpgradeBadge(this.upgrades.some((u) => this.canUpgrade(u) && this.gold >= this.costOf(u)));
+    this.ui.setUpgradeBadge(this.upgrades.some((u) => this.canUpgrade(u) && this.gold >= this.costOf(u))
+      || (this.guardianReady() && this.guardianTriesLeft() > 0 && this.armyPower() >= this.region.guardian.power));
   }
 }
 export { Worker, GatherNode };

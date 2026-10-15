@@ -166,8 +166,12 @@ window.sim = {
   },
   async step(next, level = 3) {
     const mins = await SIM.until(game, level, 8);
+    // bekçi: yenilene kadar oyna (asker topla, saldır)
+    const t0 = game.simTime || 0;
+    while (!game.rs.guardianDefeated && (game.simTime || 0) - t0 < 6 * 3600) await SIM.run(game, 0.05, { report: 9999 });
+    const gmins = Math.round(((game.simTime || 0) - t0) / 60);
     const L = JSON.parse(localStorage.getItem('sim.log') || '[]');
-    L.push({ region: region.id, mins, gold: Math.floor(game.gold), workers: game.workers.length, ambar: { ...profile.data.capital } });
+    L.push({ region: region.id, mins: mins + gmins, orderMins: mins, guardianMins: gmins, army: game.armyPower(), gold: Math.floor(game.gold), workers: game.workers.length, ambar: { ...profile.data.capital } });
     localStorage.setItem('sim.log', JSON.stringify(L));
     game.save();
     if (next) { profile.current = next; profile.save(); }

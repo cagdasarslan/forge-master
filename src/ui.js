@@ -61,6 +61,7 @@ export class UI {
           <div class="panel-tabs">
             <button data-tab="smith" class="on">Usta</button>
             <button data-tab="crew">İşçiler</button>
+            <button data-tab="army">Ordu</button>
             <button data-tab="more">Ayarlar</button>
           </div>
           <div class="panel-list"></div>
@@ -151,6 +152,12 @@ export class UI {
         if (this.game.buyUpgrade(b.dataset.up)) b.closest('.up-row').classList.add('bought');
         this.refreshUpgrades();
       }
+      const rec = e.target.closest('[data-recruit]');
+      if (rec) {
+        if (this.game.recruit(rec.dataset.recruit)) rec.closest('.up-row').classList.add('bought');
+        this.refreshUpgrades();
+      }
+      if (e.target.closest('[data-act=attack]')) this.attackGuardian();
       const r = e.target.closest('[data-act=reset]');
       if (r) {
         if (r.dataset.armed) this.profile.reset();
@@ -391,12 +398,12 @@ export class UI {
   }
 
   // ---------- görev şeridi ----------
-  objective(text, i, n) {
+  objective(text, i, n, label) {
     if (!text) { this.el.obj.hidden = true; return; }
     this.el.obj.hidden = false;
     if (this.el.objText.textContent !== text) {
       this.el.objText.textContent = text;
-      this.el.objStep.textContent = `${i + 1}/${n}`;
+      this.el.objStep.textContent = label || `${i + 1}/${n}`;
       this.el.obj.classList.remove('pop');
       void this.el.obj.offsetWidth;
       this.el.obj.classList.add('pop');
@@ -502,6 +509,7 @@ export class UI {
   refreshUpgrades() {
     if (this.el.panel.hidden || !this.game) return;
     const g = this.game;
+    if (this.tab === 'army') { this.renderArmy(); return; }
     if (this.tab === 'more') {
       const sold = Object.keys(ITEMS).filter((t) => g.stats['sold_' + t]).map((t) => `<span>${iconImg(t)}${g.stats['sold_' + t]}</span>`).join('') || '<span>Henüz satış yok</span>';
       this.el.list.innerHTML = `
@@ -534,6 +542,90 @@ export class UI {
       </div>`;
     }).join('');
     this.refreshAfford();
+  }
+
+  // ---------- ordu ve bölge bekçisi ----------
+  renderArmy() {
+    const g = this.game;
+    const gd = g.region.guardian;
+    const power = g.armyPower();
+    const k = Math.min(1, power / gd.power);
+    const tries = g.guardianTriesLeft();
+    let status, btn;
+    if (g.rs.guardianDefeated) {
+      status = '<span class="gd-done">Yenildi ✓ Yol açık</span>';
+      btn = '';
+    } else if (!g.guardianReady()) {
+      status = `<span>Saldırmak için ${REGION_UNLOCK_LEVEL}. siparişi bitir (${g.rs.level}/${REGION_UNLOCK_LEVEL})</span>`;
+      btn = '<button class="go-btn" disabled>⚔ SALDIR</button>';
+    } else {
+      status = `<span>Bugün kalan saldırı hakkı: <b>${tries}/3</b></span>`;
+      btn = `<button class="go-btn ${power >= gd.power ? 'ready' : ''}" data-act="attack" ${tries > 0 ? '' : 'disabled'}>⚔ SALDIR</button>`;
+    }
+    const units = g.region.army.map((u) => {
+      const n = g.armyCount(u.id);
+      const locked = u.requires && !g.unlocked.has(u.requires);
+      const cost = g.armyCost(u);
+      const need = locked ? g.region.unlocks.find((x) => x.id === u.requires)?.name : '';
+      const b = locked ? '<button class="buy" disabled>🔒 Kilitli</button>'
+        : !g.canRecruit(u) ? '<button class="buy max" disabled>MAKS</button>'
+          : `<button class="buy" data-recruit="${u.id}" data-cost="${cost}">${iconImg('coin')}${fmt(cost)}</button>`;
+      return `<div class="up-row ${locked ? 'locked' : ''}">
+        <div class="up-ico">${iconImg(u.icon)}</div>
+        <div class="up-mid"><b>${u.name} <i class="cnt">×${n}</i></b><small>Asker başına ${fmt(u.power)} güç · toplam ${fmt(n * u.power)}</small>${locked ? `<small class="lock">${need} gerekir</small>` : ''}</div>
+        ${b}
+      </div>`;
+    }).join('');
+    this.el.list.innerHTML = `
+      <div class="guardian">
+        <div class="gd-head">${iconImg(gd.icon, 'ico gd-ico')}<div><b>${gd.name}</b><small>Bölge bekçisi · Güç ${fmt(gd.power)}</small></div></div>
+        <p class="gd-story">${gd.story}</p>
+        <div class="gd-bar"><i style="width:${Math.round(k * 100)}%"></i><span>${iconImg('army')}Ordun ${fmt(power)} / ${fmt(gd.power)}</span></div>
+        <div class="gd-status">${status}</div>
+        ${btn}
+      </div>
+      ${units}`;
+    this.refreshAfford();
+  }
+
+  attackGuardian() {
+    const g = this.game;
+    const gd = g.region.guardian;
+    const res = g.attackGuardian();
+    if (!res) return;
+    this.closePanel();
+    const el = document.createElement('div');
+    el.id = 'finale';
+    el.className = 'battle';
+    this.root.appendChild(el);
+    const stage = (html) => { el.innerHTML = `<div class="fin-stage">${html}</div>`; };
+    stage(`<div class="clash">${iconImg('army', 'ico fin-ico')}<span>⚔</span>${iconImg(gd.icon, 'ico fin-ico')}</div>
+      <h2>${gd.name}</h2>
+      <div class="gd-bar big"><i class="grow" style="--to:${Math.min(100, Math.round((res.power / res.need) * 100))}%"></i><span>${fmt(res.power)} / ${fmt(res.need)}</span></div>
+      <p>Ordun saldırıya geçti...</p>`);
+    [400, 1100, 1800].forEach((t) => setTimeout(() => { sfx.clang(); el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash'); }, t));
+    setTimeout(() => {
+      const next = REGIONS[regionIndex(g.region.id) + 1];
+      if (res.won) {
+        sfx.unlock2();
+        stage(`<div class="fin-stars">★ ★ ★</div><h2>${gd.name} yenildi!</h2>
+          <p>${next ? `Yol açıldı: <b>${next.name}</b>` : 'Ejderha Dağı tamamen fethedildi!'}</p>
+          <p class="seal-gain">${iconImg('seal')} +${res.seals} Mühür · ${iconImg('coin')} +${fmt(res.gold)}</p>
+          <div class="card-row"><button class="go-btn alt" data-fin="close">Devam et</button>${next ? '<button class="go-btn" data-fin="map">Haritayı aç</button>' : ''}</div>`);
+      } else {
+        sfx.deny();
+        stage(`<div class="clash">${iconImg(gd.icon, 'ico fin-ico big')}</div><h2>Ordu geri çekildi</h2>
+          <p>${gd.name} çok güçlü: <b>${fmt(res.need - res.power)}</b> güç daha gerekiyor. Lonca → Ordu'dan asker al.</p>
+          <p>Bugün kalan saldırı hakkı: <b>${res.triesLeft}/3</b></p>
+          <button class="go-btn" data-fin="close">Tamam</button>`);
+      }
+    }, 2600);
+    el.addEventListener('click', (e) => {
+      const b = e.target.closest('[data-fin]');
+      if (!b) return;
+      el.remove();
+      if (b.dataset.fin === 'map') this.openMap();
+    });
   }
 
   refreshAfford() {
@@ -627,7 +719,9 @@ export class UI {
       ? '<button class="go-btn here" disabled>Buradasın</button>'
       : open
         ? `<button class="go-btn" data-go="${id}">${P.data.regions[id]?.visited ? 'GİT' : 'YOLA ÇIK'}</button>`
-        : `<button class="go-btn" disabled>🔒 ${prev.name}: ${REGION_UNLOCK_LEVEL}. sipariş gerekir (${P.level(prev.id)}/${REGION_UNLOCK_LEVEL})</button>`;
+        : P.level(prev.id) < REGION_UNLOCK_LEVEL
+          ? `<button class="go-btn" disabled>🔒 ${prev.name}: ${REGION_UNLOCK_LEVEL}. sipariş gerekir (${P.level(prev.id)}/${REGION_UNLOCK_LEVEL})</button>`
+          : `<button class="go-btn" disabled>🔒 ${prev.name}: ${prev.guardian.name} yenilmeli</button>`;
     return `<div class="card-head">${iconImg(r.icon, 'ico card-ico')}<div><b>${r.name}</b><span class="card-sub">Sipariş seviyesi ${lvl}</span></div></div>
       <p class="card-intro">${r.intro}</p>
       <div class="card-order"><small>Sıradaki sipariş (${orderSeals(lvl)} mühür)</small><div class="sold">${items}</div></div>
@@ -759,7 +853,7 @@ export class UI {
   orderPopup(region, level, seals, gold) {
     const idx = regionIndex(region.id);
     const next = REGIONS[idx + 1];
-    const unlock = level === REGION_UNLOCK_LEVEL && next ? `<p class="unlock">Yeni bölge açıldı: <b>${next.name}</b></p>` : '';
+    const unlock = level === REGION_UNLOCK_LEVEL && next ? `<p class="unlock">${next.name} yolunu <b>${region.guardian.name}</b> tutuyor. Lonca → Ordu'dan asker toplayıp onu yen!</p>` : '';
     const caravan = level === 1 ? `<p>Kervanlar artık ${ITEMS[region.exports].name.toLowerCase()} malını Krallık Ambarı'na taşıyor.</p>` : '';
     this.modal(`<div class="modal-stars"><i class="on">★</i></div>
       <h2>Sipariş ${level} tamam!</h2>
