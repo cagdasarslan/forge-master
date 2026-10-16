@@ -19,6 +19,8 @@ import { buildWorld, makeDecal, makeColliders, collide, v3 } from './world.js';
 import { sfx } from './audio.js';
 import { Effects } from './effects.js';
 import { ICON_DRAW } from './icons.js';
+import { L, T } from './i18n.js';
+import { computePower } from './power.js';
 
 const V = THREE.Vector3;
 const tmp = new V();
@@ -241,7 +243,7 @@ class Station {
           if (near) sfx.pop(4);
         } else {
           this.game.fx.chips(this.model.localToWorld(new V(0, 0.9, 0.4)), 0xe2c27a);
-          if (near) this.game.ui.floater(this.model, 'boş', 'miss');
+          if (near) this.game.ui.floater(this.model, L('boş', 'empty'), 'miss');
         }
       }
     }
@@ -518,7 +520,7 @@ class RoyalChest {
     this.model = makeChest();
     this.model.position.copy(this.pos);
     game.scene.add(this.model);
-    this.decal = makeDecal('SİPARİŞ', 'chest', { w: def.r * 2.2, d: def.r * 1.6, color: '#ffd84a' });
+    this.decal = makeDecal(L('SİPARİŞ', 'ORDER'), 'chest', { w: def.r * 2.2, d: def.r * 1.6, color: '#ffd84a' });
     this.decal.position.x = this.zone.x;
     this.decal.position.z = this.zone.z;
     game.scene.add(this.decal);
@@ -556,7 +558,7 @@ class CaravanZone {
     this.type = game.region.exports;
     this.zone = v3([chestDef.zone[0], chestDef.zone[1] - 2.1]);
     this.r = 1.0;
-    this.decal = makeDecal('KERVAN', this.type, { w: 2.1, d: 1.5, color: '#8fb4ff' });
+    this.decal = makeDecal(L('KERVAN', 'CARAVAN'), this.type, { w: 2.1, d: 1.5, color: '#8fb4ff' });
     this.decal.position.set(this.zone.x, 0.03, this.zone.z);
     game.scene.add(this.decal);
   }
@@ -587,7 +589,7 @@ class Depot {
     a.position.copy(this.model.userData.slots.out);
     this.model.add(a);
     this.output = new Stack(a, gridLayout(3, 2, 0.5, 0.45, ITEMS[this.type].h + 0.02), DEPOT_CAP);
-    this.decal = makeDecal('GELEN', this.type, { w: 2.4, d: 1.6, color: '#8fb4ff' });
+    this.decal = makeDecal(L('GELEN', 'INCOMING'), this.type, { w: 2.4, d: 1.6, color: '#8fb4ff' });
     this.decal.position.set(this.zone.x, 0.03, this.zone.z);
     game.scene.add(this.decal);
     this.t = 0;
@@ -608,7 +610,7 @@ class Depot {
     // Ambar boşsa hangi bölgeye dönmek gerektiğini söyle
     const left = this.game.profile.ambar(this.type);
     const src = this.game.sourceOf(this.type);
-    this.bubble.set(left > 0 ? `Ambar: ${this.game.ui.icon(this.type)}${left}` : `Ambar boş! ${this.game.ui.icon(this.type)} ${src} kervanı bekleniyor`);
+    this.bubble.set(left > 0 ? `${L('Ambar', 'Storehouse')}: ${this.game.ui.icon(this.type)}${left}` : L(`Ambar boş! ${this.game.ui.icon(this.type)} ${src} kervanı bekleniyor`, `Storehouse empty! Waiting for ${this.game.ui.icon(this.type)} caravan from ${src}`));
     this.t += dt;
     if (this.t >= DEPOT_INTERVAL) {
       this.t = 0;
@@ -855,7 +857,7 @@ export class Game {
       ...BASE_UPGRADES.filter((u) => !u.crew),
       ...region.workers.map((w) => ({
         id: w.id, icon: w.icon, name: w.name, base: w.base, growth: WORKER_GROWTH, max: w.max || WORKER_MAX, worker: true, crew: true,
-        requires: w.requires, info: (l) => `${l}/${w.max || WORKER_MAX} işçi`,
+        requires: w.requires, info: (l) => `${l}/${w.max || WORKER_MAX} ${L('işçi', 'workers')}`,
       })),
       ...BASE_UPGRADES.filter((u) => u.crew),
     ];
@@ -954,6 +956,7 @@ export class Game {
   }
 
   completeOrder() {
+    const before = computePower(this.profile);
     const lvl = this.rs.level;
     const order = this.order();
     const seals = orderSeals(lvl);
@@ -967,7 +970,7 @@ export class Game {
     this.save();
     this.fx.confetti(this.chest.pos.clone().setY(1));
     sfx.unlock2();
-    this.ui.orderPopup(this.region, this.rs.level, seals, gold);
+    this.ui.orderPopup(this.region, this.rs.level, seals, gold, computePower(this.profile) - before);
   }
 
   // Şu anki siparişin altın değeri: reklam ve mağaza altını buna göre ölçeklenir
@@ -1035,8 +1038,11 @@ export class Game {
   onGuardianResult(won, hpLeft = 0) {
     const gd = this.region.guardian;
     let seals = 0, gold = 0;
+    const before = computePower(this.profile);
     if (won) {
       this.rs.guardianDefeated = true;
+      // hız bonusu: bölgede bekçiye kadar geçen aktif oyun süresi
+      this.rs.clearSec ||= Math.round(this.rs.playSec || 0);
       seals = guardianSeals(REGIONS.findIndex((r) => r.id === this.region.id));
       gold = Math.round(this.orderValue() * 0.5);
       this.profile.data.seals += seals;
@@ -1045,7 +1051,8 @@ export class Game {
       sfx.unlock2();
     } else sfx.deny();
     this.save();
-    this.ui.guardianResult({ won, seals, gold, hpLeft, hp: gd.hp, dps: this.armyDps(), triesLeft: this.guardianTriesLeft() });
+    const power = computePower(this.profile) - before;
+    this.ui.guardianResult({ won, seals, gold, hpLeft, hp: gd.hp, dps: this.armyDps(), triesLeft: this.guardianTriesLeft(), power });
   }
 
   // ---------- açılımlar ve yükseltmeler ----------
@@ -1069,7 +1076,7 @@ export class Game {
     for (const o of targets) { o.scale.setScalar(0.01); this.pops.push({ o, t: 0 }); }
     this.fx.confetti(this.pad(id).mesh.position.clone().setY(0.5));
     sfx.unlock2();
-    this.ui.toast(`${def.name} açıldı!`);
+    this.ui.toast(L(`${def.name} açıldı!`, `${def.name} unlocked!`));
     this.ui.refreshUpgrades();
     this.save();
   }
@@ -1114,7 +1121,7 @@ export class Game {
     this.workers.push(w);
     if (!silent) {
       this.fx.confetti(w.pos.clone().setY(1));
-      this.ui.toast(`${role.name} işe başladı!`);
+      this.ui.toast(L(`${role.name} işe başladı!`, `${role.name} hired!`));
     }
   }
 
@@ -1199,7 +1206,7 @@ export class Game {
   flashFull() {
     if (this.fullT > 0) return;
     this.fullT = 1.2;
-    this.ui.floater(this.player.char, 'DOLU!', 'full');
+    this.ui.floater(this.player.char, L('DOLU!', 'FULL!'), 'full');
   }
 
   collectCoins(c) {
@@ -1219,7 +1226,7 @@ export class Game {
 
   // ---------- öğretici rehber ----------
   makeGuide() {
-    this.TUT = this.region.tutorial(this);
+    this.TUT = this.region.tutorial(this).map((st) => ({ ...st, text: T(st.text) }));
     // tamamlanmış bir bölgeye dönüldüyse öğreticiyi atla
     if (this.rs.level > 0 || this.workers.length) this.rs.tut = this.TUT.length;
 
@@ -1261,7 +1268,9 @@ export class Game {
     else if (this.guardianReady()) {
       // 3. sipariş bitti: sıradaki bölgeye geçmek için bekçi yenilmeli
       const gd = this.region.guardian;
-      this.ui.objective(this.canWin() ? `Ordun hazır! Arenaya git ve ${gd.name}'e saldır` : `${gd.name}'i yenmek için ordunu güçlendir (arena ya da Lonca → Ordu)`, 0, 0, '⚔');
+      this.ui.objective(this.canWin()
+        ? L(`Ordun hazır! Arenaya git ve ${gd.name}'e saldır`, `Your army is ready! Go to the arena and attack the ${gd.name}`)
+        : L(`${gd.name}'i yenmek için ordunu güçlendir (arena ya da Lonca → Ordu)`, `Strengthen your army to defeat the ${gd.name} (arena or Guild → Army)`), 0, 0, '⚔');
     } else this.ui.objective(null);
     const t = performance.now() * 0.004;
     this.arrow.visible = !!at;
@@ -1304,6 +1313,7 @@ export class Game {
   // ---------- ana güncelleme ----------
   update(dt, input) {
     this.time += dt;
+    this.rs.playSec = (this.rs.playSec || 0) + dt;
     const p = this.player;
     if (this.bot) this.bot.update(dt); // denge simülasyonu
     else p.move(input.x, input.z, dt);

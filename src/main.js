@@ -11,8 +11,15 @@ import { Game } from './game.js';
 import { UI } from './ui.js';
 import { Input } from './input.js';
 import { Profile } from './profile.js';
-import { regionById } from './regions/index.js';
+import { REGIONS, CAPITAL, regionById } from './regions/index.js';
+import { ITEMS, BASE_UPGRADES, META } from './config.js';
+import { BOSSES } from './bosses.js';
+import { localizeData } from './i18n.js';
 import { initMonetization } from './monetization.js';
+import { cloud } from './cloud.js';
+
+// İngilizce seçiliyse bölge, eşya, düşman adlarını sahne kurulmadan önce çevir
+localizeData(REGIONS, CAPITAL, ITEMS, BASE_UPGRADES, META, BOSSES);
 
 const app = document.getElementById('app');
 
@@ -79,6 +86,8 @@ ui.onTravel = (id) => {
 ui.openMenu(); // açılışta ana menü
 // reklam ve satın alma (Android'de AdMob + Play Billing, diğerlerinde test modu)
 initMonetization({ grantGems: (n) => ui.grantGems(n) });
+// hesap ve bulut yedeği: misafir hesap açılır, kayıt buluta yazılır (sunucuda daha yenisi varsa o yüklenir)
+cloud.init(profile);
 if (offline && Object.keys(offline.gained).length) ui.offlinePopup(offline);
 // haftalık sefer: süre dolduysa yeni düşman
 const rolled = profile.ensureCampaign();
@@ -123,10 +132,10 @@ function placeCamera(dt) {
 }
 placeCamera(0);
 
-document.addEventListener('visibilitychange', () => { if (document.hidden) game.save(); });
+document.addEventListener('visibilitychange', () => { if (document.hidden) { game.save(); cloud.sync(); } });
 addEventListener('pagehide', () => game.save());
 if (Capacitor.isNativePlatform()) {
-  App.addListener('pause', () => game.save());
+  App.addListener('pause', () => { game.save(); cloud.sync(); });
   // Android geri tuşu: açık pencereyi kapat, ana menüdeyse uygulamayı arka plana al
   App.addListener('backButton', () => { if (!ui.back()) { game.save(); App.minimizeApp(); } });
 }
@@ -150,6 +159,7 @@ if (import.meta.env.DEV) {
   const SIM = await import('./sim.js');
   window.game = game;
   window.profile = profile;
+  window.cloud = cloud;
   window.sim = {
     run: (h, o) => SIM.run(game, h, o),
     until: (l, m) => SIM.until(game, l, m),

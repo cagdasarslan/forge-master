@@ -59,7 +59,7 @@ Emülatörde/telefonda denemek için debug APK: `npm run android:apk` → `andro
 
 ## 5. Play Console
 
-1. **Uygulama oluştur:** ad *Forge Master*, varsayılan dil Türkçe, Oyun, Ücretsiz.
+1. **Uygulama oluştur:** ad *Forge Master: Demirci Krallığı* (30 karakter; telefondaki simgenin altında kısa ad "Forge Master" kalır), varsayılan dil Türkçe, Oyun, Ücretsiz.
 2. **Test → Dahili test** → yeni sürüm → AAB'yi yükle. (Uygulama içi ürünler ancak bir AAB yüklendikten sonra oluşturulabilir.)
 3. **Para kazanma → Ürünler → Uygulama içi ürünler** (önce ödeme profilini tamamla). Dört ürün, kimlikler birebir aynı olmalı:
 
@@ -146,15 +146,25 @@ Free to play; contains ads and optional in-app purchases.
 | Finansal özellikler, sağlık | Yok |
 
 **Veri güvenliği (Data safety):**
-- Veri topluyor ya da paylaşıyor mu: **Evet** (AdMob SDK nedeniyle)
+- Veri topluyor ya da paylaşıyor mu: **Evet**
 - Aktarımda şifreleniyor: **Evet**
-- Kullanıcı veri silme isteyebilir mi: hesap yok; veriler cihazda. "Hesap oluşturulmuyor" seçeneğini işaretle.
-- Toplanan veri türleri (hepsi **paylaşılıyor: Evet**, **zorunlu**, amaç: **Reklam veya pazarlama, Analiz, Dolandırıcılığı önleme/güvenlik**):
-  - Konum → Yaklaşık konum
-  - Uygulama etkinliği → Uygulama etkileşimleri
-  - Uygulama bilgileri ve performans → Kilitlenme günlükleri, Teşhis
-  - Cihaz veya diğer kimlikler → Cihaz veya diğer kimlikler
-- Satın alma geçmişi: ödeme Google Play'de işlenir, oyun sunucuya bir şey göndermez; beyan etmen gerekmez.
+- Hesap oluşturma: **Evet** (otomatik misafir hesap, isteğe bağlı Google ile giriş)
+- Hesap silme bağlantısı: `https://cagdasarslan.github.io/forge-master/delete-account.html`
+- Kullanıcı veri silme isteyebilir: **Evet** (oyun içinden ve bu sayfadan)
+- Toplanan veri türleri:
+
+| Veri türü | Toplanıyor | Paylaşılıyor | Zorunlu mu | Amaç |
+|---|---|---|---|---|
+| Kişisel bilgiler → E-posta adresi | Evet (yalnız Google bağlanınca) | Hayır | İsteğe bağlı | Hesap yönetimi |
+| Kişisel bilgiler → Kullanıcı kimlikleri | Evet (oyuncu kimliği, takma ad) | Hayır | Zorunlu | Uygulama işlevleri, Hesap yönetimi |
+| Uygulama etkinliği → Diğer kullanıcı tarafından oluşturulan içerik (takma ad) | Evet | Hayır | İsteğe bağlı | Uygulama işlevleri |
+| Uygulama etkinliği → Diğer işlemler (oyun kaydı, güç puanı) | Evet | Hayır | Zorunlu | Uygulama işlevleri |
+| Uygulama etkinliği → Uygulama etkileşimleri | Evet (AdMob) | Evet | Zorunlu | Reklam veya pazarlama, Analiz |
+| Konum → Yaklaşık konum | Evet (AdMob) | Evet | Zorunlu | Reklam veya pazarlama, Dolandırıcılığı önleme |
+| Uygulama bilgileri ve performans → Kilitlenme günlükleri, Teşhis | Evet (AdMob) | Evet | Zorunlu | Analiz |
+| Cihaz veya diğer kimlikler | Evet (AdMob reklam kimliği) | Evet | Zorunlu | Reklam veya pazarlama, Dolandırıcılığı önleme |
+
+- Satın alma geçmişi: ödeme Google Play'de işlenir; beyan etmen gerekmez.
 
 ## 7. Kapalı test (yeni kişisel hesap: zorunlu)
 

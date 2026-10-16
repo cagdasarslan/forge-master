@@ -254,15 +254,24 @@ export class Profile {
     if (this.ambar(b.type) < b.amount) return 0;
     this.takeAmbar(b.type, b.amount);
     this.campaign.bountyN++;
+    this.data.bountiesDone = (this.data.bountiesDone || 0) + 1;
     this.data.seals += b.seals;
     this.save();
     return b.seals;
   }
 
+  // rev: her kayıtta artan sayaç. Bulut kaydı (cloud.js) hangisinin daha yeni olduğunu buna göre anlar.
   save() {
     if (this.resetting) return;
     this.data.lastSeen = Date.now();
+    this.data.rev = (this.data.rev || 0) + 1;
     try { localStorage.setItem(KEY, JSON.stringify(this.data)); } catch { /* depolama kapalı olabilir */ }
+  }
+
+  // Buluttan gelen kaydı bu cihaza yazar (sahne yeniden kurulsun diye ardından sayfa yenilenir)
+  replaceData(d) {
+    this.resetting = true;
+    try { localStorage.setItem(KEY, JSON.stringify(d)); } catch { /* yok say */ }
   }
 
   reset() {

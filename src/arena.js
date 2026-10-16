@@ -8,6 +8,7 @@ import { makeCharacter, animateCharacter, makeItem } from './models.js';
 import { makeDecal, v3 } from './world.js';
 import { ITEMS, FIGHT_TIME } from './config.js';
 import { sfx } from './audio.js';
+import { L } from './i18n.js';
 
 const tmp = new THREE.Vector3();
 const flat = (a, b) => Math.hypot(a.x - b.x, a.z - b.z);
@@ -45,7 +46,7 @@ export class Arena {
     // girişteki alan: üstüne gelince Ordu paneli açılır
     this.zone = this.center.clone().addScaledVector(this.dir, 4.7);
     this.r = 1.1;
-    this.decal = makeDecal('ORDU', 'army', { w: 2.2, d: 1.6, color: '#ff8a7a' });
+    this.decal = makeDecal(L('ORDU', 'ARMY'), 'army', { w: 2.2, d: 1.6, color: '#ff8a7a' });
     this.decal.position.set(this.zone.x, 0.03, this.zone.z);
     game.scene.add(this.decal);
     this.inZone = false;
@@ -89,7 +90,7 @@ export class Arena {
       }
       if (want > 0) {
         if (!this.levelBubbles[u.id]) this.levelBubbles[u.id] = g.ui.bubble(this.figs.find((f) => f.unit === u).ch, 2.3, 'lvl');
-        this.levelBubbles[u.id].set(`Sv.${lvl}`);
+        this.levelBubbles[u.id].set(`${L('Sv.', 'Lv.')}${lvl}`);
       }
     }
   }
@@ -206,7 +207,7 @@ export class Arena {
     this.bubble.show(this.state !== 'dead' && this.state !== 'dying' && (near || fighting));
     if (this.bubble.visible) {
       const k = this.hp / this.def.hp;
-      const timer = fighting ? `<em>${Math.ceil(FIGHT_TIME - this.t)} sn</em>` : '';
+      const timer = fighting ? `<em>${Math.ceil(FIGHT_TIME - this.t)} ${L('sn', 's')}</em>` : '';
       this.bubble.set(`<b>${this.def.name}</b>${timer}<div class="hpbar"><i style="width:${(k * 100).toFixed(1)}%"></i><span>❤ ${fmtN(this.hp)} / ${fmtN(this.def.hp)}</span></div>`);
     }
     for (const b of Object.values(this.levelBubbles)) b.show(near || fighting);

@@ -6,6 +6,7 @@
 // AdMob kimlikleri: AD_UNITS ve android/app/src/main/res/values/strings.xml içindeki admob_app_id.
 // Kendi telefonunda gerçek reklama tıklama; AdMob → Ayarlar → Test cihazları'na telefonunu ekle.
 import { Capacitor } from '@capacitor/core';
+import { L, LOCALE } from './i18n.js';
 
 export const NATIVE = Capacitor.getPlatform() === 'android';
 export const TEST_MODE = !NATIVE;
@@ -25,18 +26,18 @@ const ADS_TESTING = AD_UNITS.banner.startsWith('ca-app-pub-3940256099942544');
 export const GEM_PACKS = [
   { id: 'gems_s', gems: 100, bonus: 0, price: '₺29,99' },
   { id: 'gems_m', gems: 500, bonus: 10, price: '₺129,99' },
-  { id: 'gems_l', gems: 1200, bonus: 20, price: '₺279,99', tag: 'EN POPÜLER' },
-  { id: 'gems_xl', gems: 3000, bonus: 35, price: '₺599,99', tag: 'EN İYİ DEĞER' },
+  { id: 'gems_l', gems: 1200, bonus: 20, price: '₺279,99', tag: L('EN POPÜLER', 'MOST POPULAR') },
+  { id: 'gems_xl', gems: 3000, bonus: 35, price: '₺599,99', tag: L('EN İYİ DEĞER', 'BEST VALUE') },
 ];
 export const packTotal = (p) => Math.round(p.gems * (1 + p.bonus / 100));
 
 // Elmasla alınanlar. Altın miktarı bölgenin şu anki siparişinin değerine göre ölçeklenir.
 export const SHOP_ITEMS = [
-  { id: 'gold_s', icon: 'coin', name: 'Altın Kesesi', gems: 40, gold: 1.0 },
-  { id: 'gold_l', icon: 'chest', name: 'Altın Sandığı', gems: 150, gold: 4.5 },
-  { id: 'boost_30', icon: 'bolt', name: 'Bereket · 30 dk', gems: 60, boost: 30 },
-  { id: 'boost_120', icon: 'bolt', name: 'Bereket · 2 saat', gems: 200, boost: 120 },
-  { id: 'seals_5', icon: 'seal', name: 'Mühür Kesesi · 5', gems: 120, seals: 5 },
+  { id: 'gold_s', icon: 'coin', name: L('Altın Kesesi', 'Pouch of Gold'), gems: 40, gold: 1.0 },
+  { id: 'gold_l', icon: 'chest', name: L('Altın Sandığı', 'Chest of Gold'), gems: 150, gold: 4.5 },
+  { id: 'boost_30', icon: 'bolt', name: L('Bereket · 30 dk', 'Boost · 30 min'), gems: 60, boost: 30 },
+  { id: 'boost_120', icon: 'bolt', name: L('Bereket · 2 saat', 'Boost · 2 hours'), gems: 200, boost: 120 },
+  { id: 'seals_5', icon: 'seal', name: L('Mühür Kesesi · 5', 'Seal Pouch · 5'), gems: 120, seals: 5 },
 ];
 
 // Ödüllü reklamlar
@@ -150,21 +151,21 @@ function showFakeRewarded(profile, title) {
     el.id = 'ad-overlay';
     el.innerHTML = `
       <div class="ad-frame">
-        <span class="ad-tag">TEST REKLAMI</span>
+        <span class="ad-tag">${L('TEST REKLAMI', 'TEST AD')}</span>
         <div class="ad-art">⚒️</div>
         <div class="ad-title">${title}</div>
-        <div class="ad-sub">Reklam bitince ödül krallığına eklenir</div>
+        <div class="ad-sub">${L('Reklam bitince ödül krallığına eklenir', 'Your reward is added when the ad ends')}</div>
         <div class="ad-progress"><div></div></div>
         <div class="ad-timer"></div>
       </div>
-      <button class="ad-close" aria-label="Kapat">✕</button>`;
+      <button class="ad-close" aria-label="${L('Kapat', 'Close')}">✕</button>`;
     document.getElementById('app').appendChild(el);
     const timer = el.querySelector('.ad-timer');
     const bar = el.querySelector('.ad-progress div');
     const close = el.querySelector('.ad-close');
     let left = AD_SECONDS;
     const tick = () => {
-      timer.textContent = left > 0 ? `Ödül için ${left} sn` : 'Ödül kazandın! Kapat →';
+      timer.textContent = left > 0 ? L(`Ödül için ${left} sn`, `Reward in ${left} s`) : L('Ödül kazandın! Kapat →', 'Reward earned! Close →');
       bar.style.width = `${((AD_SECONDS - left) / AD_SECONDS) * 100}%`;
     };
     tick();
@@ -250,12 +251,12 @@ function fakeConfirm(pack) {
     el.id = 'buy-confirm';
     el.innerHTML = `
       <div class="modal-card">
-        <h2>Satın alma</h2>
-        <p class="bc-line"><b>${packTotal(pack).toLocaleString('tr-TR')}</b> elmas · <b>${pack.price}</b></p>
-        <p class="bc-test">Test modu: gerçek ödeme alınmaz.</p>
+        <h2>${L('Satın alma', 'Purchase')}</h2>
+        <p class="bc-line"><b>${packTotal(pack).toLocaleString(LOCALE)}</b> ${L('elmas', 'gems')} · <b>${pack.price}</b></p>
+        <p class="bc-test">${L('Test modu: gerçek ödeme alınmaz.', 'Test mode: no real payment is taken.')}</p>
         <div class="card-row">
-          <button class="go-btn alt" data-bc="cancel">Vazgeç</button>
-          <button class="go-btn" data-bc="ok">Satın al</button>
+          <button class="go-btn alt" data-bc="cancel">${L('Vazgeç', 'Cancel')}</button>
+          <button class="go-btn" data-bc="ok">${L('Satın al', 'Buy')}</button>
         </div>
       </div>`;
     document.getElementById('app').appendChild(el);
@@ -287,10 +288,10 @@ async function showBanner() {
 }
 
 const HOUSE_ADS = [
-  { text: '💎 Elmas paketlerinde %35\'e varan bonus!', go: 'gems' },
-  { text: '📺 Reklam izle, 5 dakika 2 kat kaynak!', go: 'free' },
-  { text: '⚡ Bereketle atölyelerin iki kat hızlı çalışsın', go: 'shop' },
-  { text: '🪙 Ücretsiz altın için reklam izle', go: 'free' },
+  { text: L('💎 Elmas paketlerinde %35\'e varan bonus!', '💎 Up to 35% bonus on gem packs!'), go: 'gems' },
+  { text: L('📺 Reklam izle, 5 dakika 2 kat kaynak!', '📺 Watch an ad for 5 minutes of x2 resources!'), go: 'free' },
+  { text: L('⚡ Bereketle atölyelerin iki kat hızlı çalışsın', '⚡ Boost makes your workshops twice as fast'), go: 'shop' },
+  { text: L('🪙 Ücretsiz altın için reklam izle', '🪙 Watch an ad for free gold'), go: 'free' },
 ];
 
 export function startBanner(el, onTap) {

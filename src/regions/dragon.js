@@ -3,6 +3,7 @@
 import * as THREE from 'three';
 import { makeDragon } from '../models.js';
 import { sfx } from '../audio.js';
+import { L } from '../i18n.js';
 
 const LAIR = new THREE.Vector3(-2, 0, -13.5);
 const SLEEP = [16, 24], WARN = 2.5, AWAKE = 6;
@@ -160,11 +161,11 @@ export default {
             it.mesh.removeFromParent();
             lost++;
           }
-          g.ui.floater(p.char, lost ? `YANDIN! -${lost}` : 'YANDIN!', 'full');
+          g.ui.floater(p.char, lost ? `${L('YANDIN!', 'BURNED!')} -${lost}` : L('YANDIN!', 'BURNED!'), 'full');
           sfx.deny();
         }
       }
     }
-    h.bubble.set(h.state === 'sleep' ? '💤' : h.state === 'warn' ? '⚠️ uyanıyor' : '🔥');
+    h.bubble.set(h.state === 'sleep' ? '💤' : h.state === 'warn' ? L('⚠️ uyanıyor', '⚠️ waking') : '🔥');
   },
 };

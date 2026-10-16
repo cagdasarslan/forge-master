@@ -221,6 +221,42 @@ const DRAW = {
     g.fillStyle = '#1f8fb8'; g.beginPath(); g.moveTo(56, 40); g.lineTo(84, 40); g.lineTo(48, 82); g.closePath(); g.fill();
     g.strokeStyle = '#2a1a10'; g.lineWidth = 3; g.beginPath(); g.moveTo(12, 40); g.lineTo(84, 40); g.moveTo(40, 40); g.lineTo(48, 82); g.lineTo(56, 40); g.stroke();
   },
+  trophy(g) {
+    // kupa: kulplar, gövde, ayak
+    g.lineWidth = 7; g.strokeStyle = '#2a1a10';
+    g.beginPath(); g.arc(24, 34, 12, Math.PI * 0.5, Math.PI * 1.5); g.stroke();
+    g.beginPath(); g.arc(72, 34, 12, -Math.PI * 0.5, Math.PI * 0.5); g.stroke();
+    g.beginPath(); g.moveTo(24, 16); g.lineTo(72, 16); g.lineTo(68, 46); g.quadraticCurveTo(48, 66, 28, 46); g.closePath(); outline(g, '#f2c230');
+    g.beginPath(); g.moveTo(42, 58); g.lineTo(54, 58); g.lineTo(56, 72); g.lineTo(40, 72); g.closePath(); outline(g, '#d99a1e');
+    rr(g, 28, 72, 40, 12, 4); outline(g, '#8a5a2b');
+    g.fillStyle = 'rgba(255,255,255,.6)'; g.fillRect(34, 22, 6, 18);
+  },
+  power(g) {
+    // güç: kalkan üstünde şimşek
+    g.beginPath(); g.moveTo(48, 8); g.lineTo(82, 20); g.quadraticCurveTo(80, 66, 48, 88); g.quadraticCurveTo(16, 66, 14, 20); g.closePath(); outline(g, '#c23b30');
+    g.beginPath(); g.moveTo(54, 22); g.lineTo(34, 52); g.lineTo(47, 52); g.lineTo(42, 74); g.lineTo(64, 42); g.lineTo(51, 42); g.closePath(); outline(g, '#ffd84a', 4);
+  },
+  gear(g) {
+    // ayarlar: dişli çark
+    g.beginPath();
+    for (let i = 0; i < 16; i++) {
+      const a0 = (i / 16) * Math.PI * 2, r = i % 2 ? 30 : 40;
+      g.lineTo(48 + Math.cos(a0 - 0.12) * r, 48 + Math.sin(a0 - 0.12) * r);
+      g.lineTo(48 + Math.cos(a0 + 0.12) * r, 48 + Math.sin(a0 + 0.12) * r);
+    }
+    g.closePath(); outline(g, '#b7aa98');
+    g.beginPath(); g.arc(48, 48, 13, 0, 7); outline(g, '#5a3519', 4);
+  },
+  globe(g) {
+    g.beginPath(); g.arc(48, 48, 36, 0, 7); outline(g, '#5ab4e0');
+    g.strokeStyle = '#2a1a10'; g.lineWidth = 4;
+    g.beginPath(); g.ellipse(48, 48, 16, 36, 0, 0, 7); g.stroke();
+    g.beginPath(); g.moveTo(12, 48); g.lineTo(84, 48); g.moveTo(18, 30); g.lineTo(78, 30); g.moveTo(18, 66); g.lineTo(78, 66); g.stroke();
+  },
+  user(g) {
+    g.beginPath(); g.arc(48, 34, 18, 0, 7); outline(g, '#f6e7c4');
+    g.beginPath(); g.moveTo(16, 86); g.quadraticCurveTo(18, 56, 48, 56); g.quadraticCurveTo(78, 56, 80, 86); g.closePath(); outline(g, '#5a7ac8');
+  },
   bolt(g) {
     g.beginPath(); g.moveTo(56, 8); g.lineTo(22, 54); g.lineTo(44, 54); g.lineTo(36, 88); g.lineTo(76, 38); g.lineTo(52, 38); g.closePath(); outline(g, '#ffd84a');
   },

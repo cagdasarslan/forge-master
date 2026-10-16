@@ -1,4 +1,5 @@
 // Bölgelerden bağımsız ekonomi değerleri. Bölgeye özel tarif, sipariş ve yerleşim src/regions/ altında.
+import { L } from './i18n.js';
 
 // Eşyalar: satış fiyatı ve sırtta/rafta kapladığı yükseklik
 export const ITEMS = {
@@ -39,12 +40,12 @@ export const QUEUE_MAX = 4;
 // İşçiler bölge verisinden eklenir. cost = base * growth^seviye
 // Değerler, bir haftalık hedefin ~12-13 saat oyun sürmesi için bot simülasyonuyla ayarlandı (scripts/README).
 export const BASE_UPGRADES = [
-  { id: 'speed',    icon: 'boot',    name: 'Deri Çizme',   base: 40,  growth: 1.6,  max: 12, info: (l) => `Hız ${stats.speed(l).toFixed(1)}` },
-  { id: 'capacity', icon: 'basket',  name: 'Sırt Küfesi',  base: 50,  growth: 1.55, max: 15, info: (l) => `Taşıma ${stats.capacity(l)}` },
-  { id: 'gather',   icon: 'axe',     name: 'Keskin Balta', base: 60,  growth: 1.6,  max: 15, info: (l) => `Toplama ${(1 / stats.gather(l)).toFixed(1)}/sn` },
-  { id: 'craft',    icon: 'bellows', name: 'Körük',        base: 120, growth: 1.55, max: 20, info: (l) => `Atölye x${(1 / stats.craft(l)).toFixed(2)}` },
-  { id: 'fame',     icon: 'banner',  name: 'Ün',           base: 150, growth: 1.6,  max: 20, info: (l) => `Fiyat +%${Math.round((stats.price(l) - 1) * 100)}` },
-  { id: 'training', icon: 'beer',    name: 'İşçi Eğitimi', base: 300, growth: 1.7,  max: 15, crew: true, info: (l) => `İşçi taşıma ${stats.workerCap(l)}, hız ${stats.workerSpeed(l).toFixed(1)}` },
+  { id: 'speed',    icon: 'boot',    name: 'Deri Çizme',   base: 40,  growth: 1.6,  max: 12, info: (l) => `${L('Hız', 'Speed')} ${stats.speed(l).toFixed(1)}` },
+  { id: 'capacity', icon: 'basket',  name: 'Sırt Küfesi',  base: 50,  growth: 1.55, max: 15, info: (l) => `${L('Taşıma', 'Carry')} ${stats.capacity(l)}` },
+  { id: 'gather',   icon: 'axe',     name: 'Keskin Balta', base: 60,  growth: 1.6,  max: 15, info: (l) => `${L('Toplama', 'Gather')} ${(1 / stats.gather(l)).toFixed(1)}/${L('sn', 's')}` },
+  { id: 'craft',    icon: 'bellows', name: 'Körük',        base: 120, growth: 1.55, max: 20, info: (l) => `${L('Atölye', 'Workshop')} x${(1 / stats.craft(l)).toFixed(2)}` },
+  { id: 'fame',     icon: 'banner',  name: 'Ün',           base: 150, growth: 1.6,  max: 20, info: (l) => L(`Fiyat +%${Math.round((stats.price(l) - 1) * 100)}`, `Price +${Math.round((stats.price(l) - 1) * 100)}%`) },
+  { id: 'training', icon: 'beer',    name: 'İşçi Eğitimi', base: 300, growth: 1.7,  max: 15, crew: true, info: (l) => L(`İşçi taşıma ${stats.workerCap(l)}, hız ${stats.workerSpeed(l).toFixed(1)}`, `Worker carry ${stats.workerCap(l)}, speed ${stats.workerSpeed(l).toFixed(1)}`) },
 ];
 export const WORKER_GROWTH = 2.2;
 export const WORKER_MAX = 4;
@@ -66,12 +67,12 @@ export const stats = {
 
 // Krallık Mührü ile alınan kalıcı bonuslar (bütün bölgelerde geçerli)
 export const META = [
-  { id: 'startGold',  icon: 'coin',    name: 'Hazine Sandığı',   max: 10, cost: (l) => 2 + l * 2, info: (l) => `Yeni bölgeye ${l * 150} altınla başla` },
-  { id: 'freeWorker', icon: 'beer',    name: 'Sadık Cüce',       max: 1,  cost: () => 6,          info: (l) => (l ? 'Her bölgede ilk işçi bedava' : 'Her bölgede ilk işçi bedava olur') },
-  { id: 'boots',      icon: 'boot',    name: 'Kraliyet Çizmesi', max: 5,  cost: (l) => 3 + l * 3, info: (l) => `Oyuncu hızı +%${l * 8}` },
-  { id: 'merchant',   icon: 'banner',  name: 'Lonca Ferman',     max: 10, cost: (l) => 4 + l * 3, info: (l) => `Bütün satışlar +%${l * 5}` },
-  { id: 'craftsman',  icon: 'bellows', name: 'Usta Çıraklık',    max: 10, cost: (l) => 4 + l * 3, info: (l) => `Bütün atölyeler +%${l * 5} hızlı` },
-  { id: 'passive',    icon: 'map',     name: 'Kervan Yolu',      max: 5,  cost: (l) => 5 + l * 4, info: (l) => `Ambara akış +%${l * 30}` },
+  { id: 'startGold',  icon: 'coin',    name: 'Hazine Sandığı',   max: 10, cost: (l) => 2 + l * 2, info: (l) => L(`Yeni bölgeye ${l * 150} altınla başla`, `Start new regions with ${l * 150} gold`) },
+  { id: 'freeWorker', icon: 'beer',    name: 'Sadık Cüce',       max: 1,  cost: () => 6,          info: (l) => (l ? L('Her bölgede ilk işçi bedava', 'First worker free in every region') : L('Her bölgede ilk işçi bedava olur', 'Makes the first worker free in every region')) },
+  { id: 'boots',      icon: 'boot',    name: 'Kraliyet Çizmesi', max: 5,  cost: (l) => 3 + l * 3, info: (l) => L(`Oyuncu hızı +%${l * 8}`, `Player speed +${l * 8}%`) },
+  { id: 'merchant',   icon: 'banner',  name: 'Lonca Ferman',     max: 10, cost: (l) => 4 + l * 3, info: (l) => L(`Bütün satışlar +%${l * 5}`, `All sales +${l * 5}%`) },
+  { id: 'craftsman',  icon: 'bellows', name: 'Usta Çıraklık',    max: 10, cost: (l) => 4 + l * 3, info: (l) => L(`Bütün atölyeler +%${l * 5} hızlı`, `All workshops +${l * 5}% faster`) },
+  { id: 'passive',    icon: 'map',     name: 'Kervan Yolu',      max: 5,  cost: (l) => 5 + l * 4, info: (l) => L(`Ambara akış +%${l * 30}`, `Storehouse flow +${l * 30}%`) },
 ];
 
 // Bölgeden Krallık Ambarı'na dakikadaki pasif kervan akışı (bölgede en az bir sipariş bitmiş olmalı)
