@@ -43,7 +43,7 @@ Gerçek kimliklerle kendi telefonunda test ederken **kendi reklamlarına tıklam
 
 ## 3. Gizlilik politikası
 
-[docs/privacy.html](docs/privacy.html) hazır. İçindeki `ILETISIM_EPOSTASI` yerine iletişim e-postanı yaz. Sonra GitHub'da depo → Settings → Pages → Branch: `main`, klasör: `/docs` → Save. Adres şöyle olur:
+[docs/privacy.html](docs/privacy.html) hazır (iletişim: leronsoftware@gmail.com). Yayın için GitHub'da depo → Settings → Pages → Branch: `main`, klasör: `/docs` → Save. Adres şöyle olur:
 
 `https://<kullanıcı-adın>.github.io/forge-master/privacy.html`
 
@@ -171,8 +171,8 @@ Free to play; contains ads and optional in-app purchases.
 
 ## Yayından önce kontrol listesi
 
-- [ ] `admob_app_id` ve `AD_UNITS` gerçek kimliklerle değişti (test kimlikleri kalırsa reklamlar "Test Ad" olur ve gelir getirmez)
-- [ ] `docs/privacy.html` içinde iletişim e-postası yazıldı, GitHub Pages açık
+- [x] `admob_app_id` ve `AD_UNITS` gerçek kimliklerle değişti (test kimlikleri kalırsa reklamlar "Test Ad" olur ve gelir getirmez)
+- [x] `docs/privacy.html` yayında: https://cagdasarslan.github.io/forge-master/privacy.html
 - [ ] `versionCode` bir öncekinden büyük
 - [ ] `android/keystore.properties` var, `npm run android:aab` imzalı AAB üretti
 - [ ] Dahili testte: banner görünüyor, ödüllü reklam ödülü veriyor, test kartıyla elmas paketi alınıyor ve elmas ekleniyor, geri tuşu pencereleri kapatıyor

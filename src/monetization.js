@@ -3,19 +3,20 @@
 // Android'de gerçek AdMob (banner + ödüllü) ve Google Play Billing (cordova-plugin-purchase) kullanılır.
 // Tarayıcıda ve iOS'ta TEST MODU: satın almalar ve reklamlar simüle edilir.
 //
-// Yayından önce AD_UNITS ve android/app/src/main/res/values/strings.xml içindeki admob_app_id
-// gerçek AdMob kimlikleriyle değiştirilir (bkz. PLAY_STORE.md). Google'ın test kimlikleri kalırsa reklamlar
-// "Test Ad" olarak görünür ve gelir getirmez.
+// AdMob kimlikleri: AD_UNITS ve android/app/src/main/res/values/strings.xml içindeki admob_app_id.
+// Kendi telefonunda gerçek reklama tıklama; AdMob → Ayarlar → Test cihazları'na telefonunu ekle.
 import { Capacitor } from '@capacitor/core';
 
 export const NATIVE = Capacitor.getPlatform() === 'android';
 export const TEST_MODE = !NATIVE;
 export const BANNER_H = 50;
 
-// AdMob reklam birimleri (şu an Google'ın resmi test kimlikleri)
+// AdMob reklam birimleri. Denemek için Google'ın test kimlikleri:
+// banner ca-app-pub-3940256099942544/6300978111, ödüllü ca-app-pub-3940256099942544/5224354917
+// (emülatörde gerçek kimliklerle de her zaman test reklamı gelir)
 const AD_UNITS = {
-  banner: 'ca-app-pub-3940256099942544/6300978111',
-  rewarded: 'ca-app-pub-3940256099942544/5224354917',
+  banner: 'ca-app-pub-3920099901614778/8795830253',
+  rewarded: 'ca-app-pub-3920099901614778/4348573928',
 };
 const ADS_TESTING = AD_UNITS.banner.startsWith('ca-app-pub-3940256099942544');
 
