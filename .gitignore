@@ -9,3 +9,6 @@ Payload
 *.jks
 *.keystore
 keystore.properties
+
+# simge betiğinin geçici yazı tipleri
+scripts/.fonts

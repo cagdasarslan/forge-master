@@ -34,10 +34,10 @@ function Glow($g, $x, $y, $w, $h, $alpha) {
   $g.FillPath($br, $p)
 }
 
-# uyarlanabilir simge: ön yüz, simgenin kendisi %70 ölçekle ortada (kenarları zaten arka plan renginde)
+# uyarlanabilir simge: ön yüz, simge %62 ölçekle ortada; yuvarlak maskede bile yazının köşeleri güvenli alanda kalır
 $c = NewCanvas 1024 1024; $b = $c[0]; $g = $c[1]
 $g.Clear($bg)
-$s = [int](1024 * 0.70); $o = [int]((1024 - $s) / 2)
+$s = [int](1024 * 0.62); $o = [int]((1024 - $s) / 2)
 DrawIcon $g $o $o $s
 Save $b $g (Join-Path $res "icon-foreground.png")
 
@@ -57,7 +57,7 @@ $g.Clear($bg)
 $g.DrawImage($icon, 0, 0, 512, 512)
 Save $b $g (Join-Path $store "icon-512.png")
 
-# öne çıkan görsel 1024x500: solda simge, sağda başlık
+# öne çıkan görsel 1024x500: solda simge (adıyla), sağda Türkçe alt ad ve özellikler
 $c = NewCanvas 1024 500; $b = $c[0]; $g = $c[1]
 $g.Clear($bg)
 
@@ -73,13 +73,20 @@ $f1 = New-Object System.Drawing.Font $family, 64, ([System.Drawing.FontStyle]::R
 $f2 = New-Object System.Drawing.Font $family, 108, ([System.Drawing.FontStyle]::Regular), ([System.Drawing.GraphicsUnit]::Pixel)
 $f3 = New-Object System.Drawing.Font 'Segoe UI', 30, ([System.Drawing.FontStyle]::Bold), ([System.Drawing.GraphicsUnit]::Pixel)
 $cx = 745
-$g.DrawString("FORGE", $f1, $shadow, (New-Object System.Drawing.RectangleF ($cx - 300 + 4), 104, 600, 90), $fmt)
-$g.DrawString("FORGE", $f1, $gold, (New-Object System.Drawing.RectangleF ($cx - 300), 100, 600, 90), $fmt)
-$g.DrawString("MASTER", $f2, $shadow, (New-Object System.Drawing.RectangleF ($cx - 300 + 5), 165, 600, 140), $fmt)
-$g.DrawString("MASTER", $f2, $cream, (New-Object System.Drawing.RectangleF ($cx - 300), 160, 600, 140), $fmt)
-# Windows PowerShell 5.1 dosyayı ANSI okur; Türkçe harfler kodla yazılır: "Döv, sat, krallığı kur!"
-$tag = "D$([char]0xF6)v, sat, krall$([char]0x131)$([char]0x11F)$([char]0x131) kur!"
-$g.DrawString($tag, $f3, $gold, (New-Object System.Drawing.RectangleF ($cx - 300), 320, 600, 50), $fmt)
+# simgede "FORGE MASTER" zaten yazıyor; sağda Türkçe alt ad ve kısa özellikler
+# Windows PowerShell 5.1 dosyayı ANSI okur; Türkçe harfler kodla yazılır
+$l1 = "DEM$([char]0x130)RC$([char]0x130)"                                   # DEMİRCİ
+$l2 = "KRALLI$([char]0x11E)I"                                                # KRALLIĞI
+$tag = "D$([char]0xF6)v, sat, krall$([char]0x131)$([char]0x11F)$([char]0x131) kur!"   # Döv, sat, krallığı kur!
+$feat = "6 b$([char]0xF6)lge $([char]0xB7) Haftal$([char]0x131)k d$([char]0xFC)$([char]0x15F)man $([char]0xB7) S$([char]0x131)ralama"  # 6 bölge · Haftalık düşman · Sıralama
+$f4 = New-Object System.Drawing.Font 'Segoe UI', 22, ([System.Drawing.FontStyle]::Bold), ([System.Drawing.GraphicsUnit]::Pixel)
+$muted = New-Object System.Drawing.SolidBrush ([System.Drawing.Color]::FromArgb(233, 215, 176))
+$g.DrawString($l1, $f1, $shadow, (New-Object System.Drawing.RectangleF ($cx - 300 + 4), 84, 600, 90), $fmt)
+$g.DrawString($l1, $f1, $gold, (New-Object System.Drawing.RectangleF ($cx - 300), 80, 600, 90), $fmt)
+$g.DrawString($l2, $f2, $shadow, (New-Object System.Drawing.RectangleF ($cx - 300 + 5), 145, 600, 140), $fmt)
+$g.DrawString($l2, $f2, $cream, (New-Object System.Drawing.RectangleF ($cx - 300), 140, 600, 140), $fmt)
+$g.DrawString($tag, $f3, $gold, (New-Object System.Drawing.RectangleF ($cx - 300), 300, 600, 50), $fmt)
+$g.DrawString($feat, $f4, $muted, (New-Object System.Drawing.RectangleF ($cx - 300), 352, 600, 40), $fmt)
 Save $b $g (Join-Path $store "feature-graphic.png")
 
 $icon.Dispose()

@@ -100,8 +100,11 @@ Her bölgenin yolunu zincirlere bağlı bir canavar tutar: Demir Golem, Bakır B
 🐉 HER HAFTA YENİ DÜŞMAN
 Kızıl Ejderha, Buz Devi, Derinlerin Krakeni, Kara Lich… Her hafta krallığa yeni bir düşman saldırır. Bütün bölgelerin malıyla onu yenecek silahı dök. Oyun bitmez.
 
+🏆 SIRALAMA
+Siparişler, bekçiler, ordun ve hızın güç puanına dönüşür. Haftalık, aylık, yıllık ve genel sıralamada diğer demircilerle yarış.
+
 👑 KALICI İLERLEME
-Kral'ın siparişlerinden mühür kazan, kalıcı bonuslar aç. Oyunda değilken de kervanların çalışmaya devam eder.
+Kral'ın siparişlerinden mühür kazan, kalıcı bonuslar aç. Oyunda değilken de kervanların çalışmaya devam eder. Google hesabını bağla, krallığın telefon değiştirsen de seninle gelsin.
 
 Oyun ücretsizdir; reklam ve isteğe bağlı uygulama içi satın alma içerir.
 ```
@@ -124,13 +127,16 @@ A chained monster blocks the road out of every region. Recruit soldiers, level t
 🐉 A NEW ENEMY EVERY WEEK
 Red Dragon, Frost Giant, Kraken, Lich… Every week a new enemy attacks the kingdom. Forge the weapon to defeat it with goods from all regions. The game never ends.
 
+🏆 LEADERBOARDS
+Orders, guardians, your army and your speed turn into power. Compete with other smiths on weekly, monthly, yearly and all-time leaderboards.
+
 👑 PERMANENT PROGRESS
-Earn royal seals from the King's orders and unlock permanent bonuses. Caravans keep working while you're away.
+Earn royal seals from the King's orders and unlock permanent bonuses. Caravans keep working while you're away. Link your Google account and take your kingdom to any phone.
 
 Free to play; contains ads and optional in-app purchases.
 ```
 
-(Oyun şu an yalnız Türkçe. İngilizce kaydı eklersen açıklamaya "Game language: Turkish" yazmak iyi olur, yoksa yalnız Türkçe kayıt yeterli.)
+(Oyun Türkçe ve İngilizce. Mağaza kaydına İngilizce de ekle: Ana mağaza girişi → Çevirileri yönet → İngilizce (ABD) en-US.)
 
 **Uygulama içeriği (Policy → App content) yanıtları:**
 
