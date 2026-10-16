@@ -57,13 +57,14 @@ export default {
   ],
 
   guardian: {
-    name: 'Altın Timsah', icon: 'croc', power: 1600,
+    name: 'Altın Timsah', icon: 'croc', model: 'croc', hp: 77000,
+    arena: [2, -15],
     story: 'Altın pullarla kaplı dev timsah, mağaralara giden geçidi koruyor. Nehirden geçen her kayığı yutuyor.',
   },
   army: [
-    { id: 'archer', name: 'Nehir Okçusu', icon: 'bow', base: 2000, power: 50 },
-    { id: 'palace', name: 'Saray Muhafızı', icon: 'goldleaf', base: 8000, power: 210, requires: 'leaf' },
-    { id: 'goldknight', name: 'Altın Şövalye', icon: 'crown', base: 20000, power: 540, requires: 'crown' },
+    { id: 'archer', name: 'Nehir Okçusu', icon: 'bow', base: 2000, dps: 50, look: 'merchant' },
+    { id: 'palace', name: 'Saray Muhafızı', icon: 'goldleaf', base: 8000, dps: 210, look: 'noble', requires: 'leaf' },
+    { id: 'goldknight', name: 'Altın Şövalye', icon: 'crown', base: 20000, dps: 540, look: 'knight', requires: 'crown' },
   ],
   colliders: [
     { box: [-1.5, 1.5, -8, -6.1] },

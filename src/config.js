@@ -90,8 +90,11 @@ export const DEPOT_CAP = 12;
 // Ganimet: yenilen her düşman bütün satışları kalıcı olarak artırır
 export const TROPHY_BONUS = 0.03;
 
-// Ordu ve bölge bekçisi: asker fiyatı her alımda %12 artar; bekçiye günde en fazla 3 saldırı
+// Ordu ve bölge bekçisi: asker türleri seviye atlar (her seviye fiyatı %12 artırır, vuruşu bir kat ekler);
+// bekçiye günde en fazla 3 saldırı, her saldırı FIGHT_TIME saniye sürer
 export const ARMY_GROWTH = 1.12;
-export const ARMY_MAX = 30;
+export const ARMY_MAX = 40;
 export const GUARDIAN_TRIES = 3;
 export const guardianSeals = (regionIdx) => 3 + regionIdx * 2;
+
+export const FIGHT_TIME = 30;

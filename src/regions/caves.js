@@ -59,13 +59,14 @@ export default {
   ],
 
   guardian: {
-    name: 'Kristal Örümcek Kraliçesi', icon: 'spider', power: 1450,
+    name: 'Kristal Örümcek Kraliçesi', icon: 'spider', model: 'spider', hp: 80000,
+    arena: [10, 2.5],
     story: 'Mağaranın en derininde ağ ören kraliçe, ejderha dağına giden tüneli kristal ağlarla kapattı.',
   },
   army: [
-    { id: 'lantern', name: 'Fenerci', icon: 'crystalore', base: 2500, power: 60 },
-    { id: 'mage', name: 'Kristal Büyücü', icon: 'crystal', base: 10000, power: 260, requires: 'torches' },
-    { id: 'archmage', name: 'Baş Büyücü', icon: 'staff', base: 25000, power: 650, requires: 'magic' },
+    { id: 'lantern', name: 'Fenerci', icon: 'crystalore', base: 2500, dps: 60, look: 'dwarf-miner' },
+    { id: 'mage', name: 'Kristal Büyücü', icon: 'crystal', base: 10000, dps: 260, look: 'wizard', requires: 'torches' },
+    { id: 'archmage', name: 'Baş Büyücü', icon: 'staff', base: 25000, dps: 650, look: 'wizard', requires: 'magic' },
   ],
   colliders: [
     { box: [-2.5, 0.5, -7.5, -5.6] },

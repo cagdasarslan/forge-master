@@ -4,8 +4,9 @@ import * as THREE from 'three';
 import {
   ITEMS, STATION_INPUT_CAP, STATION_OUTPUT_CAP, SHELF_CAP, QUEUE_MAX,
   BASE_UPGRADES, upgradeCost, stats, WORKER_GROWTH, WORKER_MAX, orderSeals, DEPOT_INTERVAL, DEPOT_CAP,
-  ARMY_GROWTH, ARMY_MAX, GUARDIAN_TRIES, guardianSeals, REGION_UNLOCK_LEVEL,
+  ARMY_GROWTH, ARMY_MAX, GUARDIAN_TRIES, guardianSeals, REGION_UNLOCK_LEVEL, FIGHT_TIME,
 } from './config.js';
+import { Arena } from './arena.js';
 import { MACHINES, animateMachine, makeDepot, makeWagon } from './machines.js';
 import { REGIONS } from './regions/index.js';
 
@@ -893,6 +894,10 @@ export class Game {
 
     this.stationBubbles = this.stations.map((s) => ({ s, b: ui.bubble(s.model, 3.1, 'station') }));
 
+    // bölge bekçisinin arenası ve askerler
+    this.arena = new Arena(this);
+    this.arena.syncSoldiers();
+
     this.makeGuide();
     this.hazard = null;
     region.setup?.(this);
@@ -979,9 +984,13 @@ export class Game {
   }
 
   // ---------- ordu ve bölge bekçisi ----------
+  // Asker türleri seviye atlar: seviye x tür başına saniyelik vuruş. Figürler arena.js'te.
   armyCount(id) { return this.rs.army?.[id] || 0; }
   armyCost(u) { return Math.round(u.base * Math.pow(ARMY_GROWTH, this.armyCount(u.id))); }
-  armyPower() { return this.region.army.reduce((s, u) => s + this.armyCount(u.id) * u.power, 0); }
+  armyDps() { return this.region.army.reduce((s, u) => s + this.armyCount(u.id) * u.dps, 0); }
+  armyPower() { return this.armyDps(); }
+  // 30 saniyede canavarın canını bitirebilir mi?
+  canWin() { return this.armyDps() * FIGHT_TIME >= this.region.guardian.hp; }
   canRecruit(u) { return (!u.requires || this.unlocked.has(u.requires)) && this.armyCount(u.id) < ARMY_MAX; }
 
   recruit(id) {
@@ -994,6 +1003,7 @@ export class Game {
     this.rs.army[id] = this.armyCount(id) + 1;
     this.ui.setGold(this.gold);
     sfx.buy();
+    this.arena.syncSoldiers();
     this.save();
     return true;
   }
@@ -1006,17 +1016,24 @@ export class Game {
   }
 
   guardianReady() { return this.rs.level >= REGION_UNLOCK_LEVEL && !this.rs.guardianDefeated; }
+  get fighting() { return this.arena.state === 'fight'; }
 
-  // Saldırı: ordunun gücü bekçinin gücüne yetiyorsa bekçi ölür. Sonucu döndürür.
+  // Saldırıyı başlatır: askerler arenaya yürür ve FIGHT_TIME saniye vurur. Sonuç onGuardianResult'ta.
   attackGuardian() {
-    const gd = this.region.guardian;
-    if (!this.guardianReady() || this.guardianTriesLeft() <= 0) return null;
+    if (!this.guardianReady() || this.guardianTriesLeft() <= 0 || this.fighting || !this.figuresReady()) return false;
     const day = new Date().toDateString();
     const t = this.rs.bossTries?.day === day ? this.rs.bossTries : { day, n: 0 };
     t.n++;
     this.rs.bossTries = t;
-    const power = this.armyPower();
-    const won = power >= gd.power;
+    this.save();
+    this.arena.startFight();
+    return true;
+  }
+
+  figuresReady() { return this.arena.figs.length > 0; }
+
+  onGuardianResult(won, hpLeft = 0) {
+    const gd = this.region.guardian;
     let seals = 0, gold = 0;
     if (won) {
       this.rs.guardianDefeated = true;
@@ -1025,9 +1042,10 @@ export class Game {
       this.profile.data.seals += seals;
       this.gold += gold;
       this.ui.setGold(this.gold);
-    }
+      sfx.unlock2();
+    } else sfx.deny();
     this.save();
-    return { won, power, need: gd.power, seals, gold, triesLeft: this.guardianTriesLeft() };
+    this.ui.guardianResult({ won, seals, gold, hpLeft, hp: gd.hp, dps: this.armyDps(), triesLeft: this.guardianTriesLeft() });
   }
 
   // ---------- açılımlar ve yükseltmeler ----------
@@ -1237,13 +1255,13 @@ export class Game {
       // öğretici bitti: ödenebilir inşa alanı ya da sipariş için elinde ürün varsa sandığı göster
       const pad = this.pads.find((p) => p.visible && this.gold >= p.remaining * 0.6);
       const carriesOrder = this.player.stack.items.some((it) => this.orderRemaining(it.type) > 0);
-      at = pad ? pad.pos : carriesOrder ? this.chest.zone : null;
+      at = pad ? pad.pos : carriesOrder ? this.chest.zone : this.guardianReady() ? this.arena.zone : null;
     }
     if (step) this.ui.objective(step.text, rs.tut, this.TUT.length);
     else if (this.guardianReady()) {
       // 3. sipariş bitti: sıradaki bölgeye geçmek için bekçi yenilmeli
       const gd = this.region.guardian;
-      this.ui.objective(this.armyPower() >= gd.power ? `Ordun hazır! Lonca → Ordu → ${gd.name}'e saldır` : `${gd.name}'i yenmek için Lonca → Ordu'dan asker topla`, 0, 0, '⚔');
+      this.ui.objective(this.canWin() ? `Ordun hazır! Arenaya git ve ${gd.name}'e saldır` : `${gd.name}'i yenmek için ordunu güçlendir (arena ya da Lonca → Ordu)`, 0, 0, '⚔');
     } else this.ui.objective(null);
     const t = performance.now() * 0.004;
     this.arrow.visible = !!at;
@@ -1298,6 +1316,7 @@ export class Game {
     for (const w of this.workers) w.update(dt);
     this.chest.update(dt, this.time);
     this.depot?.update(dt);
+    this.arena.update(dt);
     this.updateCaravans(dt);
     for (const sp of this.refs.spinners || []) sp.obj.rotation[sp.axis] += sp.speed * dt;
     for (const b of this.refs.banners || []) b.userData.flag.rotation.y = Math.sin(this.time * 2 + b.position.x) * 0.25;
@@ -1346,7 +1365,7 @@ export class Game {
     this.saveT += dt;
     if (this.saveT > 4) { this.saveT = 0; this.save(); }
     this.ui.setUpgradeBadge(this.upgrades.some((u) => this.canUpgrade(u) && this.gold >= this.costOf(u))
-      || (this.guardianReady() && this.guardianTriesLeft() > 0 && this.armyPower() >= this.region.guardian.power));
+      || (this.guardianReady() && this.guardianTriesLeft() > 0 && this.canWin()));
   }
 }
 export { Worker, GatherNode };

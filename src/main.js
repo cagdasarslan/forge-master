@@ -1,4 +1,9 @@
 import * as THREE from 'three';
+import { Capacitor } from '@capacitor/core';
+import { App } from '@capacitor/app';
+// yazı tipleri pakete gömülü (çevrimdışı da çalışır, Türkçe karakterler latin-ext'te)
+import '@fontsource/lilita-one';
+import '@fontsource/pirata-one';
 import './style.css';
 import './map.css';
 import './monetization.css';
@@ -7,11 +12,11 @@ import { UI } from './ui.js';
 import { Input } from './input.js';
 import { Profile } from './profile.js';
 import { regionById } from './regions/index.js';
-import * as SIM from './sim.js';
+import { initMonetization } from './monetization.js';
 
 const app = document.getElementById('app');
 
-// zemindeki yazılar canvas'a çizildiği için önce yazı tipini bekle (çevrimdışıysa en fazla 1.5 sn)
+// zemindeki yazılar canvas'a çizildiği için önce yazı tipini bekle (en fazla 1.5 sn)
 await Promise.race([
   Promise.all([document.fonts.load('30px "Lilita One"'), document.fonts.load('30px "Pirata One"')]).catch(() => {}),
   new Promise((r) => setTimeout(r, 1500)),
@@ -72,6 +77,8 @@ ui.onTravel = (id) => {
   location.reload();
 };
 ui.openMenu(); // açılışta ana menü
+// reklam ve satın alma (Android'de AdMob + Play Billing, diğerlerinde test modu)
+initMonetization({ grantGems: (n) => ui.grantGems(n) });
 if (offline && Object.keys(offline.gained).length) ui.offlinePopup(offline);
 // haftalık sefer: süre dolduysa yeni düşman
 const rolled = profile.ensureCampaign();
@@ -104,11 +111,12 @@ new ResizeObserver(resize).observe(app);
 resize();
 
 function placeCamera(dt) {
-  const p = game.player.pos;
+  // savaş sırasında kamera arenayı gösterir
+  const p = game.fighting ? game.arena.center : game.player.pos;
   const k = dt ? Math.min(1, dt * 5) : 1;
   camTarget.x += (p.x - camTarget.x) * k;
   camTarget.z += (p.z - 1.2 - camTarget.z) * k;
-  camera.position.copy(camTarget).addScaledVector(CAM_DIR, window.camOverride || camDist); // geliştirme: camOverride ile uzaklaş
+  camera.position.copy(camTarget).addScaledVector(CAM_DIR, (import.meta.env.DEV && window.camOverride) || camDist); // geliştirme: camOverride ile uzaklaş
   camera.lookAt(camTarget);
   sun.position.copy(camTarget).add(SUN_OFF);
   sun.target.position.copy(camTarget);
@@ -117,6 +125,11 @@ placeCamera(0);
 
 document.addEventListener('visibilitychange', () => { if (document.hidden) game.save(); });
 addEventListener('pagehide', () => game.save());
+if (Capacitor.isNativePlatform()) {
+  App.addListener('pause', () => game.save());
+  // Android geri tuşu: açık pencereyi kapat, ana menüdeyse uygulamayı arka plana al
+  App.addListener('backButton', () => { if (!ui.back()) { game.save(); App.minimizeApp(); } });
+}
 
 // ---------- Döngü ----------
 const clock = new THREE.Clock();
@@ -132,53 +145,57 @@ function frame() {
 requestAnimationFrame(frame);
 
 // geliştirme kolaylığı: konsoldan game.gold += 1000, stepGame(10, {x:1,z:0}) ile zamanı ileri sar
-window.game = game;
-window.profile = profile;
-window.sim = {
-  run: (h, o) => SIM.run(game, h, o),
-  until: (l, m) => SIM.until(game, l, m),
-  // kampanya simülasyonu: bu bölgede 3. siparişe kadar oyna, sonucu kaydet, sıradaki bölgeye geç
-  // olgun bölgenin Ambar'a saatlik gönderimini ölç
-  async rate(next, hours = 1) {
-    const t = region.exports;
-    const a0 = profile.ambar(t);
-    await SIM.run(game, hours, { report: 9999 });
-    const R = JSON.parse(localStorage.getItem('sim.rates') || '{}');
-    R[region.id] = Math.round((profile.ambar(t) - a0) / hours);
-    localStorage.setItem('sim.rates', JSON.stringify(R));
-    game.save();
-    if (next) { profile.current = next; profile.save(); }
-    return R;
-  },
-  // haftanın silahı için bu bölgenin malından eksik kalanı üret, sonra Ambar'dan silaha aktar
-  async farm(next) {
-    const t = region.exports;
-    const need = profile.boss().parts.reduce((s, p) => s + Math.max(0, (p.needs[t] || 0) - profile.given(p.id, t)), 0);
-    const t0 = game.simTime || 0;
-    while (profile.ambar(t) < need && (game.simTime || 0) - t0 < 6 * 3600) await SIM.run(game, 0.05, { report: 9999 });
-    for (const p of profile.boss().parts) profile.contribute(p.id);
-    const L = JSON.parse(localStorage.getItem('sim.log') || '[]');
-    L.push({ region: region.id + ' (silah)', mins: Math.round(((game.simTime || 0) - t0) / 60), need, ready: profile.weaponReady(), ambar: { ...profile.data.capital } });
-    localStorage.setItem('sim.log', JSON.stringify(L));
-    game.save();
-    if (next) { profile.current = next; profile.save(); }
-    return L;
-  },
-  async step(next, level = 3) {
-    const mins = await SIM.until(game, level, 8);
-    // bekçi: yenilene kadar oyna (asker topla, saldır)
-    const t0 = game.simTime || 0;
-    while (!game.rs.guardianDefeated && (game.simTime || 0) - t0 < 6 * 3600) await SIM.run(game, 0.05, { report: 9999 });
-    const gmins = Math.round(((game.simTime || 0) - t0) / 60);
-    const L = JSON.parse(localStorage.getItem('sim.log') || '[]');
-    L.push({ region: region.id, mins: mins + gmins, orderMins: mins, guardianMins: gmins, army: game.armyPower(), gold: Math.floor(game.gold), workers: game.workers.length, ambar: { ...profile.data.capital } });
-    localStorage.setItem('sim.log', JSON.stringify(L));
-    game.save();
-    if (next) { profile.current = next; profile.save(); }
-    return L;
-  },
-};
-window.stepGame = (sec, mv = { x: 0, z: 0 }) => {
-  for (let t = 0; t < sec; t += 1 / 30) { game.update(1 / 30, mv); placeCamera(1 / 30); ui.update(1 / 30); }
-  renderer.render(scene, camera);
-};
+// (yalnız `npm run dev`te; mağaza sürümünde konsol kancaları ve bot yoktur)
+if (import.meta.env.DEV) {
+  const SIM = await import('./sim.js');
+  window.game = game;
+  window.profile = profile;
+  window.sim = {
+    run: (h, o) => SIM.run(game, h, o),
+    until: (l, m) => SIM.until(game, l, m),
+    // kampanya simülasyonu: bu bölgede 3. siparişe kadar oyna, sonucu kaydet, sıradaki bölgeye geç
+    // olgun bölgenin Ambar'a saatlik gönderimini ölç
+    async rate(next, hours = 1) {
+      const t = region.exports;
+      const a0 = profile.ambar(t);
+      await SIM.run(game, hours, { report: 9999 });
+      const R = JSON.parse(localStorage.getItem('sim.rates') || '{}');
+      R[region.id] = Math.round((profile.ambar(t) - a0) / hours);
+      localStorage.setItem('sim.rates', JSON.stringify(R));
+      game.save();
+      if (next) { profile.current = next; profile.save(); }
+      return R;
+    },
+    // haftanın silahı için bu bölgenin malından eksik kalanı üret, sonra Ambar'dan silaha aktar
+    async farm(next) {
+      const t = region.exports;
+      const need = profile.boss().parts.reduce((s, p) => s + Math.max(0, (p.needs[t] || 0) - profile.given(p.id, t)), 0);
+      const t0 = game.simTime || 0;
+      while (profile.ambar(t) < need && (game.simTime || 0) - t0 < 6 * 3600) await SIM.run(game, 0.05, { report: 9999 });
+      for (const p of profile.boss().parts) profile.contribute(p.id);
+      const L = JSON.parse(localStorage.getItem('sim.log') || '[]');
+      L.push({ region: region.id + ' (silah)', mins: Math.round(((game.simTime || 0) - t0) / 60), need, ready: profile.weaponReady(), ambar: { ...profile.data.capital } });
+      localStorage.setItem('sim.log', JSON.stringify(L));
+      game.save();
+      if (next) { profile.current = next; profile.save(); }
+      return L;
+    },
+    async step(next, level = 3) {
+      const mins = await SIM.until(game, level, 8);
+      // bekçi: yenilene kadar oyna (asker topla, saldır)
+      const t0 = game.simTime || 0;
+      while (!game.rs.guardianDefeated && (game.simTime || 0) - t0 < 6 * 3600) await SIM.run(game, 0.05, { report: 9999 });
+      const gmins = Math.round(((game.simTime || 0) - t0) / 60);
+      const L = JSON.parse(localStorage.getItem('sim.log') || '[]');
+      L.push({ region: region.id, mins: mins + gmins, orderMins: mins, guardianMins: gmins, army: game.armyPower(), gold: Math.floor(game.gold), workers: game.workers.length, ambar: { ...profile.data.capital } });
+      localStorage.setItem('sim.log', JSON.stringify(L));
+      game.save();
+      if (next) { profile.current = next; profile.save(); }
+      return L;
+    },
+  };
+  window.stepGame = (sec, mv = { x: 0, z: 0 }) => {
+    for (let t = 0; t < sec; t += 1 / 30) { game.update(1 / 30, mv); placeCamera(1 / 30); ui.update(1 / 30); }
+    renderer.render(scene, camera);
+  };
+}

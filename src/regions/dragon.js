@@ -63,13 +63,14 @@ export default {
 
   // Son bölgenin bekçisi: yenilince Ejderha Dağı tamamen fethedilir (büyük mühür ödülü)
   guardian: {
-    name: 'Magma Titanı', icon: 'magma', power: 3200,
+    name: 'Magma Titanı', icon: 'magma', model: 'magma', hp: 160000,
+    arena: [8, 0.5],
     story: 'Volkanın kalbinde uyuyan Magma Titanı uyandı. Onu yenen krallık dağın tamamına sahip olur.',
   },
   army: [
-    { id: 'lavaguard', name: 'Lav Muhafızı', icon: 'lava', base: 3000, power: 75 },
-    { id: 'hunter', name: 'Ejder Avcısı', icon: 'dragonshield', base: 12000, power: 320, requires: 'shieldsmith' },
-    { id: 'fireknight', name: 'Ateş Şövalyesi', icon: 'dragonfire', base: 30000, power: 800, requires: 'shieldsmith' },
+    { id: 'lavaguard', name: 'Lav Muhafızı', icon: 'lava', base: 3000, dps: 75, look: 'dwarf-coal' },
+    { id: 'hunter', name: 'Ejder Avcısı', icon: 'dragonshield', base: 12000, dps: 320, look: 'slayer', requires: 'shieldsmith' },
+    { id: 'fireknight', name: 'Ateş Şövalyesi', icon: 'dragonfire', base: 30000, dps: 800, look: 'slayer', requires: 'shieldsmith' },
   ],
   colliders: [
     { box: [0.2, 3.8, -6.1, -4] },

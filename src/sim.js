@@ -32,12 +32,12 @@ export class Bot {
       for (let guard = 0; guard < 40; guard++) {
         const opts = g.region.army.filter((u) => g.canRecruit(u)).map((u) => ({ u, cost: g.armyCost(u) }));
         if (!opts.length) break;
-        opts.sort((a, b) => a.cost / a.u.power - b.cost / b.u.power);
+        opts.sort((a, b) => a.cost / a.u.dps - b.cost / b.u.dps);
         const best = opts.find((o) => o.cost <= g.gold);
-        if (!best || g.armyPower() >= g.region.guardian.power) break;
+        if (!best || g.canWin()) break;
         g.recruit(best.u.id);
       }
-      if (g.armyPower() >= g.region.guardian.power) g.attackGuardian();
+      if (g.canWin() && !g.fighting) g.attackGuardian();
       return;
     }
     const pad = g.pads.find((p) => p.visible);

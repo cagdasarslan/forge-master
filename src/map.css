@@ -273,3 +273,22 @@
 .up-mid b .cnt { font-style: normal; font-size: 14px; color: #7a5a3a; margin-left: 4px; }
 .clash { display: flex; align-items: center; gap: 14px; font-size: 40px; }
 .clash .fin-ico { width: 90px !important; height: 90px !important; }
+
+/* ---------- arena: can barı, asker seviyesi, hasar ---------- */
+.bubble.boss {
+  min-width: 170px;
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  padding: 5px 8px 6px;
+  border-radius: 12px;
+  background: rgba(30, 14, 10, .85);
+  border: 2px solid var(--red);
+  color: #fff;
+  font-size: 13px;
+}
+.bubble.boss b { font-weight: normal; color: var(--gold); }
+.bubble.boss em { font-style: normal; font-size: 12px; color: #ffb0a0; }
+.hpbar { position: relative; width: 100%; height: 14px; border-radius: 7px; background: #3a1a14; overflow: hidden; }
+.hpbar i { position: absolute; inset: 0 auto 0 0; background: linear-gradient(90deg, #c23b30, #ff6a4a); transition: width .2s linear; }
+.hpbar span { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 10px; font-variant-numeric: tabular-nums; text-shadow: 0 1px 0 #000; }
+.bubble.lvl { padding: 1px 7px; border-radius: 8px; background: var(--wood); border: 2px solid var(--gold); color: var(--gold); font-size: 12px; }
+.floater.dmg { color: #ff6a4a; font-size: 20px; }

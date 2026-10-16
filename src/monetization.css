@@ -159,3 +159,13 @@
 
 /* sefer rozeti tek satırda kalsın */
 #sefer { white-space: nowrap; }
+
+/* Android: AdMob banner'ı bu alanın üstüne yerel görünüm olarak çizilir */
+#banner.native { pointer-events: none; }
+#banner.native .ad-label { display: none; }
+
+.link-btn {
+  display: block; margin: 10px auto 0; padding: 6px 10px;
+  background: none; border: 0; color: var(--parch); opacity: .75;
+  font-size: 13px; text-decoration: underline;
+}

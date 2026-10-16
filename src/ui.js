@@ -1,14 +1,14 @@
 // HUD: altın, sipariş, görev şeridi, dünya üstü baloncuklar, Lonca paneli,
 // Krallık Haritası (bölgeler, başkent, mühürler) ve açılır pencereler.
 import * as THREE from 'three';
-import { ITEMS, META, exportRate, REGION_UNLOCK_LEVEL, orderSeals, TROPHY_BONUS } from './config.js';
+import { ITEMS, META, exportRate, REGION_UNLOCK_LEVEL, orderSeals, TROPHY_BONUS, FIGHT_TIME } from './config.js';
 import { REGIONS, CAPITAL, regionIndex } from './regions/index.js';
 import { BOSSES } from './bosses.js';
 import { iconImg } from './icons.js';
 import { sfx } from './audio.js';
 import {
   GEM_PACKS, SHOP_ITEMS, packTotal, AD_DAILY_LIMIT, AD_BOOST_MIN, AD_GOLD_FACTOR, TEST_MODE,
-  adsLeft, showRewarded, buyPack, startBanner,
+  adsLeft, showRewarded, buyPack, startBanner, privacyOptionsAvailable, showPrivacyOptions,
 } from './monetization.js';
 
 const tmp = new THREE.Vector3();
@@ -98,6 +98,7 @@ export class UI {
             <button class="go-btn alt" data-menu="free">${iconImg('tv')} Ücretsiz ödül</button>
             <button class="go-btn alt" id="btn-sound" data-menu="sound">🔊 Ses</button>
           </div>
+          <button class="link-btn" id="btn-privacy" data-menu="privacy" hidden>Gizlilik seçenekleri</button>
         </div>
       </div>
       <div id="store" hidden>
@@ -240,6 +241,7 @@ export class UI {
       if (a === 'map') { this.closeMenu(); this.openMap(); }
       if (a === 'store') this.openStore('gems');
       if (a === 'free') this.openStore('free');
+      if (a === 'privacy') showPrivacyOptions();
     });
     this.el.store.querySelector('.st-close').addEventListener('click', () => this.closeStore());
     this.el.store.addEventListener('pointerdown', (e) => { if (e.target === this.el.store) this.closeStore(); });
@@ -250,11 +252,9 @@ export class UI {
       const pack = e.target.closest('[data-pack]');
       if (pack) {
         const p = GEM_PACKS.find((x) => x.id === pack.dataset.pack);
-        if (await buyPack(p)) {
-          this.profile.addGems(packTotal(p));
-          sfx.unlock2();
-          this.toast(`+${packTotal(p)} elmas`);
-        }
+        // elmas, satın alma onaylanınca grantGems ile eklenir
+        const r = await buyPack(p);
+        if (r === 'unavailable') this.toast('Mağazaya bağlanılamadı, biraz sonra dene');
         this.renderStore();
       }
       const item = e.target.closest('[data-item]');
@@ -269,6 +269,7 @@ export class UI {
     sfx.unlock();
     this.closePanel();
     this.closeMap();
+    this.root.querySelector('#btn-privacy').hidden = !privacyOptionsAvailable();
     const g = this.game, P = this.profile;
     if (g) {
       const b = P.boss();
@@ -280,6 +281,28 @@ export class UI {
   }
 
   closeMenu() { this.el.menu.hidden = true; }
+
+  // Satın alma onaylandı (Play Billing'de uygulama yeniden açıldığında da gelebilir)
+  grantGems(n) {
+    this.profile.addGems(n);
+    sfx.unlock2();
+    this.toast(`+${fmt(n)} elmas`);
+    if (!this.el.store.hidden) this.renderStore();
+    this.updateMonetization();
+  }
+
+  // Android geri tuşu: en üstteki pencereyi kapatır. Kapatacak bir şey yoksa false döner (uygulama arka plana alınır).
+  back() {
+    const bc = this.root.querySelector('#buy-confirm [data-bc="cancel"]');
+    if (bc) { bc.click(); return true; }
+    if (this.root.querySelector('#ad-overlay')) return true;
+    if (!this.el.modal.hidden) { this.closeModal(); return true; }
+    if (!this.el.store.hidden) { this.closeStore(); return true; }
+    if (!this.el.panel.hidden) { this.closePanel(); return true; }
+    if (!this.el.map.hidden && this.game) { this.closeMap(); return true; }
+    if (this.el.menu.hidden) { this.openMenu(); return true; }
+    return false;
+  }
 
   openStore(tab) {
     sfx.unlock();
@@ -353,6 +376,7 @@ export class UI {
     if (adsLeft(P) <= 0) { sfx.deny(); this.toast('Bugünkü reklam hakların bitti'); return; }
     const gold = this.adGold();
     const ok = await showRewarded(P, kind === 'boost' ? `${AD_BOOST_MIN} dk 2 kat bereket` : `${fmt(gold)} altın`);
+    if (ok === 'unavailable') { sfx.deny(); this.toast('Şu an reklam yok, biraz sonra dene'); return; }
     if (!ok) return;
     if (kind === 'boost') { P.addBoost(AD_BOOST_MIN); this.toast(`Bereket başladı: ${AD_BOOST_MIN} dk x2`); }
     else if (g) { g.gold += gold; this.setGold(g.gold); g.save(); this.toast(`+${fmt(gold)} altın`); }
@@ -545,11 +569,18 @@ export class UI {
   }
 
   // ---------- ordu ve bölge bekçisi ----------
+  openArmy() {
+    this.tab = 'army';
+    for (const o of this.el.panel.querySelectorAll('.panel-tabs button')) o.classList.toggle('on', o.dataset.tab === 'army');
+    this.openPanel();
+  }
+
   renderArmy() {
     const g = this.game;
     const gd = g.region.guardian;
-    const power = g.armyPower();
-    const k = Math.min(1, power / gd.power);
+    const dps = g.armyDps();
+    const dmg30 = dps * FIGHT_TIME;
+    const k = Math.min(1, dmg30 / gd.hp);
     const tries = g.guardianTriesLeft();
     let status, btn;
     if (g.rs.guardianDefeated) {
@@ -558,74 +589,65 @@ export class UI {
     } else if (!g.guardianReady()) {
       status = `<span>Saldırmak için ${REGION_UNLOCK_LEVEL}. siparişi bitir (${g.rs.level}/${REGION_UNLOCK_LEVEL})</span>`;
       btn = '<button class="go-btn" disabled>⚔ SALDIR</button>';
+    } else if (!g.figuresReady()) {
+      status = '<span>Önce en az bir asker türü aç</span>';
+      btn = '<button class="go-btn" disabled>⚔ SALDIR</button>';
     } else {
-      status = `<span>Bugün kalan saldırı hakkı: <b>${tries}/3</b></span>`;
-      btn = `<button class="go-btn ${power >= gd.power ? 'ready' : ''}" data-act="attack" ${tries > 0 ? '' : 'disabled'}>⚔ SALDIR</button>`;
+      status = `<span>Bugün kalan saldırı hakkı: <b>${tries}/3</b> · Her saldırı ${FIGHT_TIME} sn</span>`;
+      btn = `<button class="go-btn ${g.canWin() ? 'ready' : ''}" data-act="attack" ${tries > 0 && !g.fighting ? '' : 'disabled'}>⚔ ${g.fighting ? 'SAVAŞ SÜRÜYOR' : 'SALDIR'}</button>`;
     }
     const units = g.region.army.map((u) => {
-      const n = g.armyCount(u.id);
+      const lvl = g.armyCount(u.id);
       const locked = u.requires && !g.unlocked.has(u.requires);
       const cost = g.armyCost(u);
       const need = locked ? g.region.unlocks.find((x) => x.id === u.requires)?.name : '';
       const b = locked ? '<button class="buy" disabled>🔒 Kilitli</button>'
         : !g.canRecruit(u) ? '<button class="buy max" disabled>MAKS</button>'
-          : `<button class="buy" data-recruit="${u.id}" data-cost="${cost}">${iconImg('coin')}${fmt(cost)}</button>`;
+          : `<button class="buy" data-recruit="${u.id}" data-cost="${cost}">${lvl ? '' : 'AÇ '}${iconImg('coin')}${fmt(cost)}</button>`;
+      const figs = lvl ? Math.min(3, 1 + Math.floor(lvl / 10)) : 0;
       return `<div class="up-row ${locked ? 'locked' : ''}">
         <div class="up-ico">${iconImg(u.icon)}</div>
-        <div class="up-mid"><b>${u.name} <i class="cnt">×${n}</i></b><small>Asker başına ${fmt(u.power)} güç · toplam ${fmt(n * u.power)}</small>${locked ? `<small class="lock">${need} gerekir</small>` : ''}</div>
+        <div class="up-mid"><b>${u.name} <i class="cnt">Sv.${lvl}</i></b><small>${lvl ? `Saniyede ${fmt(lvl * u.dps)} hasar · ${figs} asker` : `Seviye başına saniyede ${fmt(u.dps)} hasar`}</small>${locked ? `<small class="lock">${need} gerekir</small>` : ''}</div>
         ${b}
       </div>`;
     }).join('');
     this.el.list.innerHTML = `
       <div class="guardian">
-        <div class="gd-head">${iconImg(gd.icon, 'ico gd-ico')}<div><b>${gd.name}</b><small>Bölge bekçisi · Güç ${fmt(gd.power)}</small></div></div>
+        <div class="gd-head">${iconImg(gd.icon, 'ico gd-ico')}<div><b>${gd.name}</b><small>Bölge bekçisi · Can ${fmt(gd.hp)}</small></div></div>
         <p class="gd-story">${gd.story}</p>
-        <div class="gd-bar"><i style="width:${Math.round(k * 100)}%"></i><span>${iconImg('army')}Ordun ${fmt(power)} / ${fmt(gd.power)}</span></div>
+        <div class="gd-bar"><i style="width:${Math.round(k * 100)}%"></i><span>${iconImg('army')}${FIGHT_TIME} sn'de ${fmt(dmg30)} / ${fmt(gd.hp)} hasar</span></div>
         <div class="gd-status">${status}</div>
         ${btn}
       </div>
+      <p class="card-note">Asker türünü açınca arenada yerini alır; her seviye vuruşunu artırır. Her 10 seviyede bir asker daha katılır.</p>
       ${units}`;
     this.refreshAfford();
   }
 
   attackGuardian() {
+    if (!this.game.attackGuardian()) return;
+    this.closePanel();
+    this.toast(`Saldırı! ${FIGHT_TIME} saniyen var`);
+  }
+
+  guardianResult(r) {
     const g = this.game;
     const gd = g.region.guardian;
-    const res = g.attackGuardian();
-    if (!res) return;
-    this.closePanel();
-    const el = document.createElement('div');
-    el.id = 'finale';
-    el.className = 'battle';
-    this.root.appendChild(el);
-    const stage = (html) => { el.innerHTML = `<div class="fin-stage">${html}</div>`; };
-    stage(`<div class="clash">${iconImg('army', 'ico fin-ico')}<span>⚔</span>${iconImg(gd.icon, 'ico fin-ico')}</div>
-      <h2>${gd.name}</h2>
-      <div class="gd-bar big"><i class="grow" style="--to:${Math.min(100, Math.round((res.power / res.need) * 100))}%"></i><span>${fmt(res.power)} / ${fmt(res.need)}</span></div>
-      <p>Ordun saldırıya geçti...</p>`);
-    [400, 1100, 1800].forEach((t) => setTimeout(() => { sfx.clang(); el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash'); }, t));
-    setTimeout(() => {
-      const next = REGIONS[regionIndex(g.region.id) + 1];
-      if (res.won) {
-        sfx.unlock2();
-        stage(`<div class="fin-stars">★ ★ ★</div><h2>${gd.name} yenildi!</h2>
-          <p>${next ? `Yol açıldı: <b>${next.name}</b>` : 'Ejderha Dağı tamamen fethedildi!'}</p>
-          <p class="seal-gain">${iconImg('seal')} +${res.seals} Mühür · ${iconImg('coin')} +${fmt(res.gold)}</p>
-          <div class="card-row"><button class="go-btn alt" data-fin="close">Devam et</button>${next ? '<button class="go-btn" data-fin="map">Haritayı aç</button>' : ''}</div>`);
-      } else {
-        sfx.deny();
-        stage(`<div class="clash">${iconImg(gd.icon, 'ico fin-ico big')}</div><h2>Ordu geri çekildi</h2>
-          <p>${gd.name} çok güçlü: <b>${fmt(res.need - res.power)}</b> güç daha gerekiyor. Lonca → Ordu'dan asker al.</p>
-          <p>Bugün kalan saldırı hakkı: <b>${res.triesLeft}/3</b></p>
-          <button class="go-btn" data-fin="close">Tamam</button>`);
-      }
-    }, 2600);
-    el.addEventListener('click', (e) => {
-      const b = e.target.closest('[data-fin]');
-      if (!b) return;
-      el.remove();
-      if (b.dataset.fin === 'map') this.openMap();
-    });
+    const next = REGIONS[regionIndex(g.region.id) + 1];
+    if (r.won) {
+      this.modal(`<div class="modal-big">${iconImg(gd.icon, 'ico huge')}</div>
+        <h2>${gd.name} yenildi!</h2>
+        <p>${next ? `Yol açıldı: <b>${next.name}</b>` : 'Ejderha Dağı tamamen fethedildi!'}</p>
+        <p class="seal-gain">${iconImg('seal')} +${r.seals} Mühür · ${iconImg('coin')} +${fmt(r.gold)}</p>
+        <div class="card-row"><button class="go-btn alt" data-modal="close">Devam et</button>${next ? '<button class="go-btn" data-modal="map">Haritayı aç</button>' : ''}</div>`);
+    } else {
+      this.modal(`<div class="modal-big">${iconImg(gd.icon, 'ico huge')}</div>
+        <h2>Ordu geri çekildi</h2>
+        <p>${gd.name}'in canı ${FIGHT_TIME} saniyede bitmedi: <b>${fmt(r.hpLeft)}</b> can kaldı ve canavar iyileşti.</p>
+        <p>Ordunun saniyede vuruşu ${fmt(r.dps)}, gereken en az ${fmt(Math.ceil(r.hp / FIGHT_TIME))}. Askerlerinin seviyesini yükselt.</p>
+        <p>Bugün kalan saldırı hakkı: <b>${r.triesLeft}/3</b></p>
+        <button class="go-btn" data-modal="close">Tamam</button>`);
+    }
   }
 
   refreshAfford() {

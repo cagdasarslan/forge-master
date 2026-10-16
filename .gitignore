@@ -4,3 +4,8 @@ ios
 .claude
 Payload
 *.ipa
+
+# imza anahtarı asla depoya girmez
+*.jks
+*.keystore
+keystore.properties

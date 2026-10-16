@@ -56,13 +56,14 @@ export default {
   ],
 
   guardian: {
-    name: 'Kömür Devi', icon: 'giant', power: 1300,
+    name: 'Kömür Devi', icon: 'giant', model: 'giant', hp: 62000,
+    arena: [-10, -12],
     story: 'Kömür ocaklarının külünden doğan dev, nehir yolunu ateşle kapattı.',
   },
   army: [
-    { id: 'pikeman', name: 'Kömürcü Milis', icon: 'coal', base: 900, power: 22 },
-    { id: 'guardsman', name: 'Zırhlı Muhafız', icon: 'armor', base: 3500, power: 95, requires: 'armory' },
-    { id: 'knight', name: 'Çelik Şövalye', icon: 'steelsword', base: 9000, power: 240, requires: 'smithy' },
+    { id: 'pikeman', name: 'Kömürcü Milis', icon: 'coal', base: 900, dps: 22, look: 'soldier' },
+    { id: 'guardsman', name: 'Zırhlı Muhafız', icon: 'armor', base: 3500, dps: 95, look: 'guard', requires: 'armory' },
+    { id: 'knight', name: 'Çelik Şövalye', icon: 'steelsword', base: 9000, dps: 240, look: 'knight', requires: 'smithy' },
   ],
   colliders: [
     { box: [-1.8, 1.8, -7.6, -5.5] },

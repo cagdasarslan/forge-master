@@ -9,13 +9,13 @@ on:
 
 jobs:
   build:
-    runs-on: macos-14
+    runs-on: macos-15   # Capacitor 8 için Xcode 16+
     steps:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22    # Capacitor 8 CLI Node 22 ister
 
       - name: Bağımlılıkları kur
         run: npm ci
@@ -24,7 +24,7 @@ jobs:
         run: npm run build
 
       - name: iOS projesini oluştur
-        run: npx cap add ios
+        run: npx cap add ios --packagemanager CocoaPods   # cordova-plugin-purchase için CocoaPods (App.xcworkspace)
 
       - name: Simge, ad ve ekran yönü
         run: |
@@ -38,6 +38,8 @@ jobs:
           /usr/libexec/PlistBuddy -c "Add :UIRequiresFullScreen bool true" "$PLIST" || true
           /usr/libexec/PlistBuddy -c "Add :UIStatusBarHidden bool true" "$PLIST" || true
           /usr/libexec/PlistBuddy -c "Add :UIViewControllerBasedStatusBarAppearance bool false" "$PLIST" || true
+          # AdMob SDK bu anahtar olmadan açılışta çöker (iOS'ta reklamlar şimdilik test modunda, kimlik Google'ın test kimliği)
+          /usr/libexec/PlistBuddy -c "Add :GADApplicationIdentifier string ca-app-pub-3940256099942544~1458002511" "$PLIST" || true
 
       - name: Senkronize et
         run: npx cap sync ios

@@ -54,13 +54,14 @@ export default {
 
   // Bölge bekçisi: 3. siparişten sonra bu yenilmeden sıradaki bölge açılmaz
   guardian: {
-    name: 'Demir Golem', icon: 'golem', power: 420,
+    name: 'Demir Golem', icon: 'golem', model: 'golem', hp: 20000,
+    arena: [11.5, -5],
     story: 'Madenin derinliklerinden çıkan Demir Golem, vadiye giden yolu kesti. Ancak bir ordu onu durdurabilir.',
   },
   army: [
-    { id: 'militia', name: 'Köylü Milis', icon: 'axe', base: 150, power: 4 },
-    { id: 'swordsman', name: 'Kılıççı', icon: 'sword', base: 600, power: 18, requires: 'anvil' },
-    { id: 'shieldman', name: 'Kalkan Muhafızı', icon: 'shield', base: 1500, power: 45, requires: 'bench' },
+    { id: 'militia', name: 'Köylü Milis', icon: 'axe', base: 150, dps: 4, look: 'soldier' },
+    { id: 'swordsman', name: 'Kılıççı', icon: 'sword', base: 600, dps: 18, look: 'knight', requires: 'anvil' },
+    { id: 'shieldman', name: 'Kalkan Muhafızı', icon: 'shield', base: 1500, dps: 45, look: 'guard', requires: 'bench' },
   ],
   colliders: [
     { box: [-1.8, 1.8, -7.6, -5.5] },
@@ -82,7 +83,7 @@ export default {
     ['crates', -3, -6.8, 0.3], ['barrel', 2.6, -7.2], ['barrel', 3.2, -6.6],
     ['crates', -11.5, 11.5, 1.2], ['crates', 11.6, 11.5, -0.4], ['barrel', 12.4, 7.8], ['barrel', -12.2, 8.6],
     ['fence', -18, 16.8, 0, 10], ['fence', 0, 16.8, 0, 8], ['fence', 18, 16.8, 0, 10],
-    ['fence', 13.8, -3, Math.PI / 2, 8], ['fence', -15.4, -6, Math.PI / 2, 8],
+    ['fence', -15.4, -6, Math.PI / 2, 8],
   ],
 
   tutorial: (g) => {

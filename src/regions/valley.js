@@ -60,13 +60,14 @@ export default {
   ],
 
   guardian: {
-    name: 'Bakır Basilisk', icon: 'serpent', power: 600,
+    name: 'Bakır Basilisk', icon: 'serpent', model: 'serpent', hp: 29000,
+    arena: [11, 5],
     story: 'Bakır kayalıklarda yuvalanan Basilisk, kaleye giden geçidi tutuyor. Bakışı askerleri taşa çevirir.',
   },
   army: [
-    { id: 'slinger', name: 'Çoban Sapancı', icon: 'copper', base: 400, power: 10 },
-    { id: 'spearman', name: 'Mızrakçı', icon: 'spear', base: 1600, power: 45, requires: 'spear' },
-    { id: 'legionary', name: 'Lejyoner', icon: 'helmet', base: 4500, power: 120, requires: 'helmet' },
+    { id: 'slinger', name: 'Çoban Sapancı', icon: 'copper', base: 400, dps: 10, look: 'soldier' },
+    { id: 'spearman', name: 'Mızrakçı', icon: 'spear', base: 1600, dps: 45, look: 'legionary', requires: 'spear' },
+    { id: 'legionary', name: 'Lejyoner', icon: 'helmet', base: 4500, dps: 120, look: 'centurion', requires: 'helmet' },
   ],
   colliders: [
     { box: [-4.8, -1.2, -6.6, -4.5] },
