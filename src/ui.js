@@ -59,6 +59,7 @@ export class UI {
         <div id="toasts"></div>
         <div id="world-layer"></div>
         <button id="btn-upgrade">${iconImg('hammer')}<span>${L('GELİŞTİR', 'UPGRADE')}</span><i class="badge" hidden>!</i></button>
+        <button id="btn-dump" hidden aria-label="${L('Bırakılamayan malı at', 'Drop stuck items')}"></button>
       </div>
       <div id="joy" hidden><div class="joy-knob"></div></div>
       <div id="panel" class="sheet" hidden>
@@ -171,6 +172,8 @@ export class UI {
     this.setupSettings();
     this.tab = 'smith';
     this.el.upBtn.addEventListener('click', () => this.openPanel());
+    this.el.dump = q('#btn-dump');
+    this.el.dump.addEventListener('click', () => this.game?.dumpBackpack());
     this.el.panel.querySelector('.panel-close').addEventListener('click', () => this.closePanel());
     this.el.panel.addEventListener('pointerdown', (e) => { if (e.target === this.el.panel) this.closePanel(); });
     for (const b of this.el.panel.querySelectorAll('.panel-tabs button')) {
@@ -585,6 +588,16 @@ export class UI {
   powerGain(before) {
     const now = computePower(this.profile);
     if (now > before) this.toast(`+${fmtFull(now - before)} ${L('Güç', 'Power')}`);
+  }
+
+  // kilitlenince görünür: hangi malın atılacağını yazar ("Odunu at")
+  setDump(types) {
+    const on = types.length > 0;
+    if (this.el.dump.hidden === on) this.el.dump.hidden = !on;
+    if (!on) return;
+    const label = types.length === 1 ? L(`${ITEMS[types[0]].name} at`, `Drop ${ITEMS[types[0]].name.toLocaleLowerCase(LOCALE)}`) : L('Fazlayı at', 'Drop extra');
+    const html = `🗑${iconImg(types[0], 'ico dump-ico')}<span>${label}</span>`;
+    if (this.dumpKey !== html) { this.dumpKey = html; this.el.dump.innerHTML = html; }
   }
 
   setUpgradeBadge(on) {

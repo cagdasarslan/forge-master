@@ -31,9 +31,11 @@ await Promise.race([
 
 // ---------- Renderer ----------
 const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+// telefonda (yüksek DPI ekran) 1,5x çözünürlük ve daha hafif gölge: görüntü neredeyse aynı, kare hızı çok daha yüksek
+const MOBILE = Capacitor.isNativePlatform() || /Android|iPhone|iPad/i.test(navigator.userAgent);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, MOBILE ? 1.5 : 2));
 renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.shadowMap.type = MOBILE ? THREE.PCFShadowMap : THREE.PCFSoftShadowMap;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1.05;
 app.prepend(renderer.domElement);
@@ -56,7 +58,7 @@ scene.add(new THREE.HemisphereLight(0xfff4e0, LIGHT.lantern ? 0x1a1626 : 0x5a7a3
 const sun = new THREE.DirectionalLight(LIGHT.lantern ? 0x9a8aff : 0xffe6c0, 2.3 * (LIGHT.sun ?? 1));
 renderer.toneMappingExposure = LIGHT.exposure ?? 1.05;
 sun.castShadow = true;
-sun.shadow.mapSize.set(2048, 2048);
+sun.shadow.mapSize.set(MOBILE ? 1024 : 2048, MOBILE ? 1024 : 2048);
 const sc = sun.shadow.camera;
 sc.left = -20; sc.right = 20; sc.top = 22; sc.bottom = -22; sc.near = 1; sc.far = 70;
 sun.shadow.bias = -0.0005;

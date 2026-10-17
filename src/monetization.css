@@ -214,3 +214,23 @@
 .set-list { gap: 10px; }
 .set-links { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; font-family: system-ui, sans-serif; font-weight: 700; font-size: 14px; }
 .set-links a { color: var(--ink); }
+
+/* sırt dolunca: fazla malı atma düğmesi (alt orta, geliştir düğmesi hizasında) */
+#btn-dump {
+  pointer-events: auto;
+  position: absolute; left: 50%; bottom: calc(var(--banner-h) + 34px);
+  transform: translateX(-50%);
+  display: flex; align-items: center; gap: 6px;
+  padding: 10px 18px;
+  border-radius: 18px;
+  background: linear-gradient(#e2584a, #a8302a);
+  border: 3px solid #fff;
+  box-shadow: 0 4px 0 #6e1c17, 0 6px 14px rgba(0,0,0,.3);
+  font-size: 22px; line-height: 1;
+  text-shadow: 0 2px 0 rgba(0,0,0,.35);
+  animation: dump-pulse 1.2s ease-in-out infinite;
+}
+#btn-dump span { font-size: 15px; }
+#btn-dump:active { transform: translateX(-50%) translateY(3px); box-shadow: 0 1px 0 #6e1c17; }
+@keyframes dump-pulse { 50% { transform: translateX(-50%) scale(1.06); } }
+#btn-dump .dump-ico { width: 26px; height: 26px; }

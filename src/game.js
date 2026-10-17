@@ -1198,9 +1198,34 @@ export class Game {
       if (p.near(this.chest.zone, this.chest.r)) this.chest.tryDrop(p);
       if (p.near(this.caravan.zone, this.caravan.r)) this.caravan.tryDrop(p);
       if (this.depot?.unlocked && p.near(this.depot.zone, this.depot.r) && this.depot.tryPick(p)) sfx.pop(p.stack.total);
+      // yalnızca kilitlenince: sırt dolu ve sırttaki mal hiçbir yere bırakılamıyor (ör. dökümhanenin odun tepsisi dolu, filiz yok)
+      const stuck = p.stack.full ? this.stuckTypes() : [];
+      this.ui.setDump(stuck);
+      if (stuck.length && !this.dumpHinted) {
+        this.dumpHinted = true;
+        this.ui.toast(L('Sırtın dolu ve bu malı bırakacak yer yok. 🗑 düğmesiyle atabilirsin.', 'Your pack is full and this item has nowhere to go. Tap 🗑 to throw it away.'));
+      }
     }
     for (const pad of this.pads) pad.update(dt);
     this.fullBubble.show(p.stack.full);
+  }
+
+  // Sırtta şu an hiçbir yere bırakılamayan mallar (ör. dökümhanenin odun tepsisi dolu ama filiz yok)
+  stuckTypes() {
+    const types = [...new Set(this.player.stack.items.map((i) => i.type))];
+    return types.filter((t) => !this.destFor(t) && this.orderRemaining(t) <= 0 && t !== this.region.exports);
+  }
+
+  // Kilitlenmeyi çöz: sırttaki, hiçbir yere bırakılamayan malları yere at (diğer mallara dokunmaz)
+  dumpBackpack() {
+    const st = this.player.stack;
+    const types = this.stuckTypes();
+    if (!types.length) return 0;
+    const to = this.player.pos.clone().setY(0.05);
+    let n = 0;
+    for (const t of types) while (st.consume(t, to)) n++;
+    if (n) { sfx.drop(); this.ui.floater(this.player.char, `-${n}`, 'miss'); }
+    return n;
   }
 
   flashFull() {
