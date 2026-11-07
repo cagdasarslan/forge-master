@@ -771,6 +771,7 @@ export class UI {
         <b>${L('Gizlilik', 'Privacy')}</b>
         <div class="set-links">
           <a href="https://cagdasarslan.github.io/forge-master/privacy.html" target="_blank" rel="noopener">${L('Gizlilik politikası', 'Privacy policy')}</a>
+          <a href="https://cagdasarslan.github.io/forge-master/terms.html" target="_blank" rel="noopener">${L('Hizmet şartları', 'Terms of service')}</a>
           ${privacyOptionsAvailable() ? `<button class="link-btn dark" data-set="privacy">${L('Reklam gizlilik seçenekleri', 'Ad privacy options')}</button>` : ''}
         </div>
       </div>
