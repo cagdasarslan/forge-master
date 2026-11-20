@@ -1,4 +1,6 @@
-# Forge Master Idle
+# Ingot Empire: Idle Tycoon
+
+(Eski adı Forge Master. Play'de aynı adlı başka bir oyun olduğu için 1.1.0 sürümünde ad değişti.)
 
 Orta Çağ temalı 3D arcade-idle mobil oyun. Altı farklı bölgede atölye kurup Kral'ın siparişlerini yetiştirirsin. Bölgelerin malları Krallık Ambarı'nda birleşir ve her hafta krallığa saldıran yeni bir düşmanı yenecek silahı dövmeye gider. Oyun bitmez: her 7 günde yeni bir düşman gelir.
 

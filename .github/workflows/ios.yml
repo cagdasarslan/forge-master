@@ -1,4 +1,4 @@
-# Forge Master iOS uygulamasını GitHub'ın macOS sunucusunda imzasız olarak derler ve .ipa dosyasını indirilebilir yapar.
+# Ingot Empire iOS uygulamasını GitHub'ın macOS sunucusunda imzasız olarak derler ve .ipa dosyasını indirilebilir yapar.
 # İmzalama ve telefona kurulum Windows'ta Sideloadly ile ücretsiz Apple ID kullanılarak yapılır.
 name: iOS IPA
 
@@ -30,8 +30,8 @@ jobs:
         run: |
           cp resources/icon.png ios/App/App/Assets.xcassets/AppIcon.appiconset/AppIcon-512@2x.png
           PLIST=ios/App/App/Info.plist
-          /usr/libexec/PlistBuddy -c "Set :CFBundleDisplayName Forge Master" "$PLIST" || \
-            /usr/libexec/PlistBuddy -c "Add :CFBundleDisplayName string Forge Master" "$PLIST"
+          /usr/libexec/PlistBuddy -c "Set :CFBundleDisplayName Ingot Empire" "$PLIST" || \
+            /usr/libexec/PlistBuddy -c "Add :CFBundleDisplayName string Ingot Empire" "$PLIST"
           /usr/libexec/PlistBuddy -c "Delete :UISupportedInterfaceOrientations" "$PLIST" || true
           /usr/libexec/PlistBuddy -c "Add :UISupportedInterfaceOrientations array" "$PLIST"
           /usr/libexec/PlistBuddy -c "Add :UISupportedInterfaceOrientations:0 string UIInterfaceOrientationPortrait" "$PLIST"

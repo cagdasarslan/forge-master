@@ -221,6 +221,14 @@ const DRAW = {
     g.fillStyle = '#1f8fb8'; g.beginPath(); g.moveTo(56, 40); g.lineTo(84, 40); g.lineTo(48, 82); g.closePath(); g.fill();
     g.strokeStyle = '#2a1a10'; g.lineWidth = 3; g.beginPath(); g.moveTo(12, 40); g.lineTo(84, 40); g.moveTo(40, 40); g.lineTo(48, 82); g.lineTo(56, 40); g.stroke();
   },
+  goldbars(g) {
+    // uygulama simgesindeki gibi altın külçe yığını (2 alt, 1 üst)
+    const bar = (x, y) => {
+      g.beginPath(); g.moveTo(x - 22, y); g.lineTo(x + 22, y); g.lineTo(x + 15, y - 17); g.lineTo(x - 15, y - 17); g.closePath(); outline(g, '#f2ba28', 4);
+      g.fillStyle = '#ffe478'; g.beginPath(); g.moveTo(x - 15, y - 17); g.lineTo(x + 15, y - 17); g.lineTo(x + 17, y - 12); g.lineTo(x - 17, y - 12); g.fill();
+    };
+    bar(27, 80); bar(69, 80); bar(48, 60);
+  },
   trophy(g) {
     // kupa: kulplar, gövde, ayak
     g.lineWidth = 7; g.strokeStyle = '#2a1a10';

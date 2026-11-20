@@ -1,9 +1,9 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">Forge Master</string>
-    <string name="title_activity_main">Forge Master</string>
+    <string name="app_name">Ingot Empire</string>
+    <string name="title_activity_main">Ingot Empire</string>
     <string name="package_name">com.cagdas.forgemaster</string>
     <string name="custom_url_scheme">com.cagdas.forgemaster</string>
-    <!-- AdMob uygulama kimliği (Forge Master). Google'ın test kimliği: ca-app-pub-3940256099942544~3347511713 -->
+    <!-- AdMob uygulama kimliği (Ingot Empire). Google'ın test kimliği: ca-app-pub-3940256099942544~3347511713 -->
     <string name="admob_app_id">ca-app-pub-3920099901614778~8966475787</string>
 </resources>

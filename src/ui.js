@@ -93,9 +93,9 @@ export class UI {
       <div id="menu">
         <div class="menu-art">
           <div class="menu-sparks"></div>
-          ${iconImg('hammer', 'ico menu-logo')}
-          <h1>FORGE<b>MASTER</b></h1>
-          <p class="menu-sub">${L('Krallığın demircisi', 'Smith of the kingdom')}</p>
+          ${iconImg('goldbars', 'ico menu-logo')}
+          <h1>INGOT<b>EMPIRE</b></h1>
+          <p class="menu-sub">IDLE · ${L('Madenden imparatorluğa', 'From ore to empire')}</p>
         </div>
         <div class="menu-info"></div>
         <div class="menu-buttons">

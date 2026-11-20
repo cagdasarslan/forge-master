@@ -1,5 +1,5 @@
 # 1024x1024 uygulama simgesi üretir (saydamlık yok): resources/icon.png
-# Ocak ateşi önünde örs, üstünde çekiç ve kıvılcımlar; altta ana menüdeki gibi "FORGE MASTER" yazısı.
+# Ocak ateşi önünde örs, üstünde altın külçe yığını ve kıvılcımlar; altta ana menüdeki gibi "INGOT EMPIRE" yazısı ve küçük "IDLE" etiketi.
 # Yazı tipi oyunun kendi Pirata One'ı: node_modules'teki WOFF dosyası TTF'ye çevrilip kullanılır.
 Add-Type -AssemblyName System.Drawing
 $root = Join-Path $PSScriptRoot ".."
@@ -29,7 +29,7 @@ function Col($r, $gr, $b) { [System.Drawing.Color]::FromArgb($r, $gr, $b) }
 # arka plan: koyu ahşap, örsün arkasında ocak ışıltısı
 $g.FillRectangle((Brush 43 29 20), 0, 0, $S, $S)
 $path = New-Object System.Drawing.Drawing2D.GraphicsPath
-$path.AddEllipse(212, 25, 600, 600)
+$path.AddEllipse(252, 0, 520, 520)
 $glow = New-Object System.Drawing.Drawing2D.PathGradientBrush $path
 $glow.CenterColor = (Col 255 190 70)
 $glow.SurroundColors = @((Col 43 29 20))
@@ -37,8 +37,8 @@ $g.FillPath($glow, $path)
 
 # --- çizim (orijinal 1024'lük koordinatlarda), yukarı ve küçültülmüş olarak
 $st = $g.Save()
-$k = 0.55
-$g.TranslateTransform(229, 29)
+$k = 0.47
+$g.TranslateTransform(270, -18)
 $g.ScaleTransform($k, $k)
 
 $rnd = New-Object System.Random 4
@@ -66,19 +66,20 @@ $g.FillPolygon((Brush 255 140 40), [System.Drawing.Point[]]@((P 330 470), (P 760
 $g.FillRectangle((Brush 242 194 48), 290, 440, 44, 96)
 $g.DrawPolygon($outline, [System.Drawing.Point[]]@((P 330 470), (P 760 470), (P 810 488), (P 760 506), (P 330 506)))
 
-# çekiç (çapraz)
-$st2 = $g.Save()
-$g.TranslateTransform(640, 300)
-$g.RotateTransform(-35)
-$g.FillRectangle((Brush 138 85 48), -24, -40, 48, 330)
-$g.DrawRectangle($outline, -24, -40, 48, 330)
-$g.FillRectangle((Brush 154 164 174), -120, -120, 240, 110)
-$g.FillRectangle((Brush 200 208 216), -120, -120, 240, 30)
-$g.DrawRectangle($outline, -120, -120, 240, 110)
-$g.Restore($st2)
+# altın külçe yığını (3-2-1), kılıcın üstünde
+function Ingot($x, $y) {
+  $bw = 170; $tw = 118; $h = 62
+  $body = @((P ($x - $bw / 2) $y), (P ($x + $bw / 2) $y), (P ($x + $tw / 2) ($y - $h)), (P ($x - $tw / 2) ($y - $h)))
+  $g.FillPolygon((Brush 242 186 40), [System.Drawing.Point[]]$body)
+  $g.FillPolygon((Brush 255 228 120), [System.Drawing.Point[]]@((P ($x - $tw / 2) ($y - $h)), (P ($x + $tw / 2) ($y - $h)), (P ($x + $tw / 2 + 8) ($y - $h + 18)), (P ($x - $tw / 2 - 8) ($y - $h + 18))))
+  $g.DrawPolygon($outline, [System.Drawing.Point[]]$body)
+}
+Ingot 445 470; Ingot 600 470; Ingot 755 470
+Ingot 522 404; Ingot 677 404
+Ingot 600 338
 $g.Restore($st)
 
-# --- yazı: menüdeki gibi FORGE (altın) üstte, MASTER (krem, daha büyük) altta; kahverengi gölge ve koyu kontur
+# --- yazı: menüdeki gibi INGOT (altın) üstte, EMPIRE (krem, daha büyük) altta, en altta IDLE etiketi; kahverengi gölge ve koyu kontur
 function TextPath($text, $size, $cx, $top, $maxW) {
   $fmt = New-Object System.Drawing.StringFormat
   $fmt.Alignment = 'Center'
@@ -104,12 +105,26 @@ function DrawTitle($p, $fill) {
   $g.DrawPath($edge, $p)
   $g.FillPath($fill, $p)
 }
-$forge = TextPath 'FORGE' 190 512 543 520
-$fb = $forge.GetBounds()
-$gold = New-Object System.Drawing.Drawing2D.LinearGradientBrush ((New-Object System.Drawing.PointF 0, $fb.Top)), ((New-Object System.Drawing.PointF 0, $fb.Bottom)), (Col 255 224 96), (Col 242 168 32)
-DrawTitle $forge $gold
-$master = TextPath 'MASTER' 250 512 ($fb.Bottom + 12) 780
-DrawTitle $master (Brush 255 243 207)
+$top = TextPath 'INGOT' 170 512 448 470
+$tb = $top.GetBounds()
+$gold = New-Object System.Drawing.Drawing2D.LinearGradientBrush ((New-Object System.Drawing.PointF 0, $tb.Top)), ((New-Object System.Drawing.PointF 0, $tb.Bottom)), (Col 255 224 96), (Col 242 168 32)
+DrawTitle $top $gold
+$bottom = TextPath 'EMPIRE' 235 512 ($tb.Bottom + 12) 760
+DrawTitle $bottom (Brush 255 243 207)
+
+# IDLE etiketi: koyu, altın çerçeveli hap
+$bb = $bottom.GetBounds()
+$idle = TextPath 'IDLE' 92 512 ($bb.Bottom + 44) 400
+$ib = $idle.GetBounds()
+$pw = $ib.Width + 70; $ph = $ib.Height + 34
+$px = 512 - $pw / 2; $py = $ib.Top - 17
+$pill = New-Object System.Drawing.Drawing2D.GraphicsPath
+$r = $ph
+$pill.AddArc($px, $py, $r, $r, 90, 180); $pill.AddArc($px + $pw - $r, $py, $r, $r, 270, 180); $pill.CloseFigure()
+$g.FillPath((Brush 74 46 28), $pill)
+$rim = New-Object System.Drawing.Pen ((Col 242 194 48)), 8
+$g.DrawPath($rim, $pill)
+$g.FillPath((Brush 255 214 80), $idle)
 
 $bmp.Save($out, [System.Drawing.Imaging.ImageFormat]::Png)
 $g.Dispose(); $bmp.Dispose()

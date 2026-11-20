@@ -73,18 +73,19 @@ $f1 = New-Object System.Drawing.Font $family, 64, ([System.Drawing.FontStyle]::R
 $f2 = New-Object System.Drawing.Font $family, 108, ([System.Drawing.FontStyle]::Regular), ([System.Drawing.GraphicsUnit]::Pixel)
 $f3 = New-Object System.Drawing.Font 'Segoe UI', 30, ([System.Drawing.FontStyle]::Bold), ([System.Drawing.GraphicsUnit]::Pixel)
 $cx = 745
-# simgede "FORGE MASTER" zaten yazıyor; sağda Türkçe alt ad ve kısa özellikler
+# simgede "INGOT EMPIRE" zaten yazıyor; sağda Türkçe karşılığı ve kısa özellikler
 # Windows PowerShell 5.1 dosyayı ANSI okur; Türkçe harfler kodla yazılır
-$l1 = "DEM$([char]0x130)RC$([char]0x130)"                                   # DEMİRCİ
-$l2 = "KRALLI$([char]0x11E)I"                                                # KRALLIĞI
-$tag = "D$([char]0xF6)v, sat, krall$([char]0x131)$([char]0x11F)$([char]0x131) kur!"   # Döv, sat, krallığı kur!
+$l1 = "K$([char]0xDC)L$([char]0xC7)E"                                                  # KÜLÇE
+$l2 = "$([char]0x130)MPARATORLU$([char]0x11E)U"                                   # İMPARATORLUĞU
+$f2 = New-Object System.Drawing.Font $family, 70, ([System.Drawing.FontStyle]::Regular), ([System.Drawing.GraphicsUnit]::Pixel)
+$tag = "Kaz, erit, d$([char]0xF6)v, sat!"                                          # Kaz, erit, döv, sat!
 $feat = "6 b$([char]0xF6)lge $([char]0xB7) Haftal$([char]0x131)k d$([char]0xFC)$([char]0x15F)man $([char]0xB7) S$([char]0x131)ralama"  # 6 bölge · Haftalık düşman · Sıralama
 $f4 = New-Object System.Drawing.Font 'Segoe UI', 22, ([System.Drawing.FontStyle]::Bold), ([System.Drawing.GraphicsUnit]::Pixel)
 $muted = New-Object System.Drawing.SolidBrush ([System.Drawing.Color]::FromArgb(233, 215, 176))
 $g.DrawString($l1, $f1, $shadow, (New-Object System.Drawing.RectangleF ($cx - 300 + 4), 84, 600, 90), $fmt)
 $g.DrawString($l1, $f1, $gold, (New-Object System.Drawing.RectangleF ($cx - 300), 80, 600, 90), $fmt)
-$g.DrawString($l2, $f2, $shadow, (New-Object System.Drawing.RectangleF ($cx - 300 + 5), 145, 600, 140), $fmt)
-$g.DrawString($l2, $f2, $cream, (New-Object System.Drawing.RectangleF ($cx - 300), 140, 600, 140), $fmt)
+$g.DrawString($l2, $f2, $shadow, (New-Object System.Drawing.RectangleF ($cx - 300 + 5), 159, 600, 140), $fmt)
+$g.DrawString($l2, $f2, $cream, (New-Object System.Drawing.RectangleF ($cx - 300), 154, 600, 140), $fmt)
 $g.DrawString($tag, $f3, $gold, (New-Object System.Drawing.RectangleF ($cx - 300), 300, 600, 50), $fmt)
 $g.DrawString($feat, $f4, $muted, (New-Object System.Drawing.RectangleF ($cx - 300), 352, 600, 40), $fmt)
 Save $b $g (Join-Path $store "feature-graphic.png")

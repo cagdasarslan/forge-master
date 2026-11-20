@@ -1,6 +1,6 @@
 # Google Play'de yayınlama
 
-Forge Master'ın Android sürümü hazır: AdMob (banner + ödüllü reklam), Google Play Faturalandırma (elmas paketleri), Android geri tuşu, uyarlanabilir simge ve açılış ekranı, hedef API 36. Aşağıdaki adımların bir kısmı yalnız senin hesabınla yapılabilir (anahtar, AdMob, Play Console).
+Ingot Empire'ın (eski adı Forge Master) Android sürümü hazır: AdMob (banner + ödüllü reklam), Google Play Faturalandırma (elmas paketleri), Android geri tuşu, uyarlanabilir simge ve açılış ekranı, hedef API 36. Aşağıdaki adımların bir kısmı yalnız senin hesabınla yapılabilir (anahtar, AdMob, Play Console).
 
 Sıra: **1** anahtar → **2** AdMob → **3** Play Console'da uygulama → **4** ilk AAB'yi dahili teste yükle → **5** uygulama içi ürünler → **6** mağaza kaydı ve formlar → **7** kapalı test (12 kişi, 14 gün) → **8** üretime başvuru.
 
@@ -31,7 +31,7 @@ Play Console'da **Play Uygulama İmzalama** açık kalsın (varsayılan): Google
 
 ## 2. AdMob
 
-1. [admob.google.com](https://admob.google.com) → Uygulamalar → **Uygulama ekle** → Android → "Uygulama henüz yayınlanmadı" → ad: Forge Master.
+1. [admob.google.com](https://admob.google.com) → Uygulamalar → **Uygulama ekle** → Android → "Uygulama henüz yayınlanmadı" → ad: Ingot Empire.
 2. İki reklam birimi oluştur: **Banner** ve **Ödüllü** (ödül: 1 adet, ad önemli değil; oyun kendi ödülünü verir).
 3. Kimlikleri koy:
    - Uygulama kimliği (`ca-app-pub-XXXX~YYYY`) → [android/app/src/main/res/values/strings.xml](android/app/src/main/res/values/strings.xml) içindeki `admob_app_id`
@@ -59,7 +59,7 @@ Emülatörde/telefonda denemek için debug APK: `npm run android:apk` → `andro
 
 ## 5. Play Console
 
-1. **Uygulama oluştur:** ad *Forge Master: Demirci Krallığı* (30 karakter; telefondaki simgenin altında kısa ad "Forge Master" kalır), varsayılan dil Türkçe, Oyun, Ücretsiz.
+1. **Uygulama oluştur:** ad *Ingot Empire: Idle Tycoon* (telefondaki simgenin altında kısa ad "Ingot Empire"). Eski ad "Forge Master", Play'deki aynı adlı başka bir oyun yüzünden Kimliğe Bürünme politikasına takıldı; adda başka oyunların adlarını kullanma, varsayılan dil Türkçe, Oyun, Ücretsiz.
 2. **Test → Dahili test** → yeni sürüm → AAB'yi yükle. (Uygulama içi ürünler ancak bir AAB yüklendikten sonra oluşturulabilir.)
 3. **Para kazanma → Ürünler → Uygulama içi ürünler** (önce ödeme profilini tamamla). Dört ürün, kimlikler birebir aynı olmalı:
 
@@ -81,57 +81,59 @@ Görseller hazır: [store/](store/)
 - Öne çıkan görsel: `store/feature-graphic.png` (1024×500)
 - Telefon ekran görüntüleri: `store/screenshots/*.png` (1080×2160)
 
+**Uygulama adı:** `Ingot Empire: Idle Tycoon` (TR ve EN aynı)
+
 **Kısa açıklama (TR, en fazla 80):**
-Demirhaneni kur, kılıç döv, bekçileri yen, altı bölgeden bir krallık kur!
+Maden kaz, külçe erit, kılıç döv, bekçileri yen; imparatorluğunu kur!
 
 **Tam açıklama (TR):**
 ```
-Forge Master'da küçük bir köy demircisi olarak başlar, altı bölgeden oluşan bir krallığın demircisi olursun.
+Ingot Empire'da küçük bir köy atölyesiyle başlar, altı bölgeye yayılan bir külçe imparatorluğu kurarsın.
 
-⚒ TOPLA, ERİT, DÖV, SAT
-Odun ve maden topla, ocakta külçe erit, örste kılıç ve kalkan döv. Müşterilerin tezgahından altını topla, işçi tut, atölyeni büyüt.
+⚒ KAZ, ERİT, DÖV, SAT
+Odun ve maden topla, ocakta külçe erit, örste kılıç ve kalkan döv. Tezgahlardan altını topla, işçi tut, atölyeni büyüt.
 
 🗺 ALTI FARKLI BÖLGE
-Demirci Köyü, Bakır Vadisi, Kömür Kalesi, Altın Nehri, Kristal Mağaraları ve Ejderha Dağı. Her bölgenin kendi madeni, makineleri ve görünümü var. Bölgelerin malları kervanlarla Krallık Ambarı'nda birleşir.
+Köy, Bakır Vadisi, Kömür Kalesi, Altın Nehri, Kristal Mağaraları ve Ejderha Dağı. Her bölgenin kendi madeni, makineleri ve görünümü var. Bölgelerin malları kervanlarla ambarda birleşir.
 
 ⚔ BÖLGE BEKÇİLERİ
 Her bölgenin yolunu zincirlere bağlı bir canavar tutar: Demir Golem, Bakır Basilisk, Kömür Devi, Altın Timsah, Kristal Örümcek Kraliçesi ve Magma Titanı. Askerlerini topla, seviyelerini yükselt ve arenada saldır!
 
 🐉 HER HAFTA YENİ DÜŞMAN
-Kızıl Ejderha, Buz Devi, Derinlerin Krakeni, Kara Lich… Her hafta krallığa yeni bir düşman saldırır. Bütün bölgelerin malıyla onu yenecek silahı dök. Oyun bitmez.
+Kızıl Ejderha, Buz Devi, Derinlerin Krakeni, Kara Lich… Her hafta yeni bir düşman saldırır. Bütün bölgelerin malıyla onu yenecek silahı dök. Oyun bitmez.
 
 🏆 SIRALAMA
-Siparişler, bekçiler, ordun ve hızın güç puanına dönüşür. Haftalık, aylık, yıllık ve genel sıralamada diğer demircilerle yarış.
+Siparişler, bekçiler, ordun ve hızın güç puanına dönüşür. Haftalık, aylık, yıllık ve genel sıralamada diğer oyuncularla yarış.
 
 👑 KALICI İLERLEME
-Kral'ın siparişlerinden mühür kazan, kalıcı bonuslar aç. Oyunda değilken de kervanların çalışmaya devam eder. Google hesabını bağla, krallığın telefon değiştirsen de seninle gelsin.
+Siparişlerden mühür kazan, kalıcı bonuslar aç. Oyunda değilken de kervanların çalışmaya devam eder. Google hesabını bağla, imparatorluğun telefon değiştirsen de seninle gelsin.
 
 Oyun ücretsizdir; reklam ve isteğe bağlı uygulama içi satın alma içerir.
 ```
 
-**Short description (EN):** Build your forge, craft swords, beat the guardians and unite six regions!
+**Short description (EN):** Mine ore, smelt ingots, craft swords, beat the guardians and build your empire!
 
 **Full description (EN):**
 ```
-Start as a village blacksmith and become the master smith of a six-region kingdom.
+Start with a small village workshop and grow an ingot empire across six regions.
 
-⚒ GATHER, SMELT, FORGE, SELL
-Gather wood and ore, smelt ingots, forge swords and shields on the anvil. Collect gold from your stalls, hire workers and grow your workshop.
+⚒ MINE, SMELT, CRAFT, SELL
+Gather wood and ore, smelt ingots, craft swords and shields on the anvil. Collect gold from your stalls, hire workers and grow your workshop.
 
 🗺 SIX UNIQUE REGIONS
-Blacksmith Village, Copper Valley, Coal Castle, Gold River, Crystal Caves and Dragon Mountain, each with its own ore, machines and look. Caravans carry every region's goods to the Royal Storehouse.
+Village, Copper Valley, Coal Castle, Gold River, Crystal Caves and Dragon Mountain, each with its own ore, machines and look. Caravans carry every region's goods to the storehouse.
 
 ⚔ REGION GUARDIANS
 A chained monster blocks the road out of every region. Recruit soldiers, level them up and attack in the arena!
 
 🐉 A NEW ENEMY EVERY WEEK
-Red Dragon, Frost Giant, Kraken, Lich… Every week a new enemy attacks the kingdom. Forge the weapon to defeat it with goods from all regions. The game never ends.
+Red Dragon, Frost Giant, Kraken, Lich… Every week a new enemy attacks. Craft the weapon to defeat it with goods from all regions. The game never ends.
 
 🏆 LEADERBOARDS
-Orders, guardians, your army and your speed turn into power. Compete with other smiths on weekly, monthly, yearly and all-time leaderboards.
+Orders, guardians, your army and your speed turn into power. Compete with other players on weekly, monthly, yearly and all-time leaderboards.
 
 👑 PERMANENT PROGRESS
-Earn royal seals from the King's orders and unlock permanent bonuses. Caravans keep working while you're away. Link your Google account and take your kingdom to any phone.
+Earn seals from orders and unlock permanent bonuses. Caravans keep working while you're away. Link your Google account and take your empire to any phone.
 
 Free to play; contains ads and optional in-app purchases.
 ```
